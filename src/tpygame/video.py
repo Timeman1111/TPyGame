@@ -76,3 +76,5 @@ class Video:
 
         self.x += x
         self.y += y
+
+
