@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Update `.idea/workspace.xml` and `.gitignore` to refine project settings and exclude IDE files" />
+    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Update `.idea/workspace.xml` to adjust changelists and refine project metadata">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/random_video_player.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/random_video_player.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -29,6 +32,7 @@
       </GitPushTagMode>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -106,7 +110,7 @@
       <option name="presentableId" value="Default" />
       <updated>1777781341358</updated>
       <workItem from="1777781342397" duration="4867000" />
-      <workItem from="1777787282349" duration="939000" />
+      <workItem from="1777787282349" duration="1342000" />
     </task>
     <task id="LOCAL-00001" summary="Add PyCharm project configuration files">
       <option name="closed" value="true" />
@@ -196,7 +200,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777788189745</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Update `.idea/workspace.xml` to adjust changelists and refine project metadata">
+      <option name="closed" value="true" />
+      <created>1777788319513</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1777788319513</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -215,6 +227,7 @@
     <MESSAGE value="Add fallback for testing video download and adjust output size" />
     <MESSAGE value="Add .gitignore to exclude build files and test artifacts" />
     <MESSAGE value="Update `.idea/workspace.xml` and `.gitignore` to refine project settings and exclude IDE files" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update `.idea/workspace.xml` and `.gitignore` to refine project settings and exclude IDE files" />
+    <MESSAGE value="Update `.idea/workspace.xml` to adjust changelists and refine project metadata" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update `.idea/workspace.xml` to adjust changelists and refine project metadata" />
   </component>
 </project>
