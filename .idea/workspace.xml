@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Remove sample Python script and update project configuration files">
-      <change afterPath="$PROJECT_DIR$/src/tpygame/render.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/tpygame/term_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-    </list>
+    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Add initial project setup with `pyproject.toml` and terminal utilities for ANSI escape support" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -104,7 +99,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1777781341358</updated>
-      <workItem from="1777781342397" duration="824000" />
+      <workItem from="1777781342397" duration="842000" />
     </task>
     <task id="LOCAL-00001" summary="Add PyCharm project configuration files">
       <option name="closed" value="true" />
@@ -122,7 +117,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777781925959</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Add initial project setup with `pyproject.toml` and terminal utilities for ANSI escape support">
+      <option name="closed" value="true" />
+      <created>1777782183786</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1777782183786</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -131,6 +134,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Add PyCharm project configuration files" />
     <MESSAGE value="Remove sample Python script and update project configuration files" />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove sample Python script and update project configuration files" />
+    <MESSAGE value="Add initial project setup with `pyproject.toml` and terminal utilities for ANSI escape support" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add initial project setup with `pyproject.toml` and terminal utilities for ANSI escape support" />
   </component>
 </project>
