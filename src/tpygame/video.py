@@ -1,3 +1,11 @@
+"""
+Manages a sequence of image frames and renders them using ImageSurface.
+
+This module provides the `Video` class to handle a queue of image frames by transforming
+them into `ImageSurface` objects for efficient rendering. It includes functionality
+to input frames, render them on a target screen, reset the rendering state, and move
+the rendering position on the screen.
+"""
 
 from collections import deque
 import numpy as np
@@ -61,7 +69,6 @@ class Video:
     def move(self, x: int, y: int):
         """
         Updates the position of the object by a specified offset in both the x and y axes.
-
         :param x: The offset by which the x-coordinate should be incremented.
         :param y: The offset by which the y-coordinate should be incremented.
         :return: None
@@ -69,5 +76,3 @@ class Video:
 
         self.x += x
         self.y += y
-
-

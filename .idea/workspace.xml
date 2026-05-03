@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Add unit tests for `Screen` class functions and fix relative imports in `tpygame` package" />
+    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Update PyCharm workspace settings to include Git push tags configuration">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/image.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/image.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/render.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/render.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/video.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/video.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -105,7 +111,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1777781341358</updated>
-      <workItem from="1777781342397" duration="2011000" />
+      <workItem from="1777781342397" duration="2458000" />
     </task>
     <task id="LOCAL-00001" summary="Add PyCharm project configuration files">
       <option name="closed" value="true" />
@@ -155,7 +161,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777783256332</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Update PyCharm workspace settings to include Git push tags configuration">
+      <option name="closed" value="true" />
+      <created>1777783397050</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1777783397050</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -169,6 +183,7 @@
     <MESSAGE value="Update PyCharm workspace settings and add JSON schema configuration for `pyproject.toml`" />
     <MESSAGE value="Implement `Frame`, `ImageSurface`, and `Video` classes; update project structure for rendering and terminal pixel manipulation" />
     <MESSAGE value="Add unit tests for `Screen` class functions and fix relative imports in `tpygame` package" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add unit tests for `Screen` class functions and fix relative imports in `tpygame` package" />
+    <MESSAGE value="Update PyCharm workspace settings to include Git push tags configuration" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update PyCharm workspace settings to include Git push tags configuration" />
   </component>
 </project>

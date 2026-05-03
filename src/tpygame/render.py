@@ -1,7 +1,6 @@
-
 """Render: terminal display manager with frame buffering and pixel-level rendering."""
+
 import os
-import random
 import sys
 
 
@@ -9,7 +8,6 @@ import sys
 from .frame import Frame
 from .term_utils import (
     init_terminal,
-    clear,
     hide_cursor,
     show_cursor,
     generate_move_string,

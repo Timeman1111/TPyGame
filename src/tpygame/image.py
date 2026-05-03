@@ -1,3 +1,11 @@
+"""
+This module provides functionality for loading and displaying images using
+numpy arrays and efficient rendering techniques.
+
+The module includes methods to load images and a class to represent an image
+surface for rendering.
+"""
+
 import numpy as np
 import cv2
 
