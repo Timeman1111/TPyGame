@@ -19,9 +19,11 @@ class Frame:
         # Use a list for flat storage if dimensions are known, else fallback to dict
         if width > 0 and height > 0:
             self.pixels = [(0, 0, 0)] * (width * height)
+            self._black = self.pixels[:]  # reusable zero-filled reference list for reset
             self.is_flat = True
         else:
             self.pixels: dict[tuple[int, int], tuple[int, int, int]] = {}
+            self._black = None
             self.is_flat = False
 
     def __setitem__(self, key: tuple[int, int], value: tuple[int, int, int]):
@@ -99,6 +101,16 @@ class Frame:
         Returns the number of pixels in the frame.
         """
         return len(self.pixels)
+
+    def reset(self):
+        """
+        Resets all pixels to (0, 0, 0) in-place, avoiding a new allocation.
+        Uses the precomputed _black reference list so no temporary list is created.
+        """
+        if self.is_flat:
+            self.pixels[:] = self._black
+        else:
+            self.pixels.clear()
 
     def compare(self, other: "Frame"):
         """

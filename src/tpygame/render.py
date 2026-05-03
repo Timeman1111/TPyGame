@@ -99,46 +99,66 @@ class Screen:
         sys.stdout.write(text + end)
         sys.stdout.flush()
 
-    def refresh(self):
+    def refresh(self, force_full: bool = False):
         """
         Refreshes the terminal screen by comparing the current frame with the previous one
         and outputting only the changes, or a full refresh if too many changes occur.
+
+        If force_full is True, the comparison is skipped and the entire frame is always
+        written — use this when the caller knows every pixel has changed (e.g. video).
+
+        All output is batched into a single write + flush to minimise I/O syscalls.
+        The cursor is hidden for the duration of the write and restored to its prior
+        visible/hidden state afterwards.
         """
-        self.hide_cursor()
+        cursor_was_visible = self.is_cursor_visible
+        parts = ["\033[?25l"]  # Hide cursor at the start of every refresh
 
-        changes = self.f1.compare(self.p1)
-
-        if len(changes) > (self.width * self.height) // 2:
-            # Full refresh
-            self.home_cursor()
-            output = [
-                build_pixel(
-                    self.f1.pixels[vy * 2 * self.width + x],
-                    self.f1.pixels[(vy * 2 + 1) * self.width + x],
-                )
-                if x < self.width - 1
-                else build_pixel(
-                    self.f1.pixels[vy * 2 * self.width + x],
-                    self.f1.pixels[(vy * 2 + 1) * self.width + x],
-                ) + "\n"
-                for vy in range(self.height)
-                for x in range(self.width)
-            ]
-            self.__out("".join(output) + "\033[0m", end="")
+        if force_full:
+            do_full = True
+            changes = None
         else:
-            # Partial refresh
-            output = []
-            for (x, vy), (top, bottom) in changes.items():
-                output.append(generate_move_string(x, vy) + build_pixel(top, bottom))
-            self.__out("".join(output) + "\033[0m", end="")
+            changes = self.f1.compare(self.p1)
+            do_full = len(changes) > (self.width * self.height) // 2
 
-        self.p1 = self.f1
-        self.f1 = Frame(self.width, self.height * 2)
+        if do_full:
+            # Full refresh — build output row by row (one terminal row = two pixel rows).
+            parts.append(generate_move_string(0, 0))
+            width = self.width
+            height = self.height
+            pixels = self.f1.pixels
+            for vy in range(height):
+                top_base = vy * 2 * width
+                bottom_base = top_base + width
+                row_parts = [
+                    build_pixel(pixels[top_base + x], pixels[bottom_base + x])
+                    for x in range(width)
+                ]
+                parts.append("".join(row_parts) + "\n")
+            parts.append("\033[0m")
+        else:
+            # Partial refresh — sort by (vy, x) and skip move escapes for adjacent cells.
+            prev_vy = -1
+            prev_x = -1
+            for (x, vy), (top, bottom) in sorted(changes.items()):
+                if vy == prev_vy and x == prev_x + 1:
+                    parts.append(build_pixel(top, bottom))
+                else:
+                    parts.append(generate_move_string(x, vy) + build_pixel(top, bottom))
+                prev_vy = vy
+                prev_x = x
+            parts.append("\033[0m")
 
-        self.move_to_bottom()
+        # Move to bottom, restore cursor visibility, and emit everything in one syscall
+        parts.append(generate_move_string(0, self.height - 1))
+        if cursor_was_visible:
+            parts.append("\033[?25h")
+        sys.stdout.write("".join(parts))
+        sys.stdout.flush()
 
-        if self.is_cursor_visible:
-            self.show_cursor()
+        # Swap frames and reset the new f1 in-place — no new Frame allocation
+        self.p1, self.f1 = self.f1, self.p1
+        self.f1.reset()
 
     def move_to_bottom(self):
         """

@@ -94,8 +94,10 @@ def test_refresh_full(mock_build, mock_terminal):
     # Force full refresh by setting many pixels
     with patch.object(Frame, 'compare', return_value={(x, y): ((0,0,0), (0,0,0)) for x in range(80) for y in range(20)}):
         screen.refresh()
-        # It should have called home_cursor
-        mock_terminal['write'].assert_any_call("\033[1;1H")
+        # All output is batched into a single sys.stdout.write call.
+        # The batch starts with hide-cursor, then the home-cursor move escape.
+        written = mock_terminal['write'].call_args[0][0]
+        assert "\033[1;1H" in written  # home cursor is embedded in the batch
 
 @patch('tpygame.render.build_pixel', return_value="P")
 def test_refresh_partial(mock_build, mock_terminal):
@@ -103,7 +105,8 @@ def test_refresh_partial(mock_build, mock_terminal):
     # Force partial refresh by setting few pixels
     with patch.object(Frame, 'compare', return_value={(5, 5): ((255,0,0), (0,255,0))}):
         screen.refresh()
-        # Partial refresh calls self.__out("".join(output) + "\033[0m", end="")
-        # output.append(generate_move_string(x, vy) + build_pixel(top, bottom))
-        # so it should be \033[6;6HP\033[0m
-        mock_terminal['write'].assert_any_call("\033[6;6HP\033[0m")
+        # All output is batched into a single sys.stdout.write call.
+        written = mock_terminal['write'].call_args[0][0]
+        assert "\033[6;6H" in written  # move to changed cell (5, 5)
+        assert "P" in written           # pixel was rendered
+        assert "\033[0m" in written     # color reset is present
