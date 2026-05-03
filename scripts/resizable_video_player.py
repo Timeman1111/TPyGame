@@ -5,6 +5,8 @@ import time
 import pathlib
 import sys
 
+
+
 TEST_VIDEO_PATH = "scripts/test_files/random_video.mp4"
 
 def ensure_test_video():
@@ -19,7 +21,13 @@ def ensure_test_video():
 
 def main():
     ensure_test_video()
-    
+
+
+    proc_count = 2
+    thread_count = 2
+
+    cfg = tpy.render.parallel.ParallelConfig(enabled=True, num_processes=proc_count, num_threads=thread_count)
+
     ts = tpy.render.screen.Screen()
     ts.hide_cursor()
 
@@ -27,7 +35,6 @@ def main():
     vid = tpy.render.video.Video(
         source=TEST_VIDEO_PATH,
         auto_resize=True,
-        bitrate=50000
     )
 
     print("Playing video with auto_resize=True. Resize your terminal to test!")

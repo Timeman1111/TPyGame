@@ -43,7 +43,7 @@ def main():
         width=width,
         height=height,
         source=TEST_VIDEO_PATH,
-        bitrate=30000
+        bitrate=99999999
     )
 
     while vid.next_frame():
