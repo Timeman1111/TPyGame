@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "TPyGame"
-version = "0.0.3"
+version = "0.0.4"
 description = "A project using NumPy and OpenCV"
 readme = "README.md"
 requires-python = ">=3.14"
