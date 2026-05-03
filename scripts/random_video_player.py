@@ -63,8 +63,7 @@ def main():
 
 
         vid.draw(ts)
-        ts.refresh()
-        ts.move_to_bottom()
+        ts.refresh(force_full=True)
 
 
 

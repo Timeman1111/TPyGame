@@ -50,6 +50,7 @@ def show_cursor():
     print("\033[?25h", end="")
 
 
+@lru_cache(maxsize=4096)
 def generate_move_string(x: int, y: int):
     """Return an ANSI escape string that moves the cursor to (x, y)."""
     return f"\033[{y + 1};{x + 1}H"
