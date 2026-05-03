@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Update module docstrings for `tpygame` submodules and refine `render` file imports">
+    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Add .gitignore to exclude build files and test artifacts">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/random_video_player.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/random_video_player.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,12 +39,12 @@
     &quot;assignee&quot;: &quot;Timeman1111&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Timeman1111/TPyGame.git",
-    "accountId": "6aada241-4b3a-4e9f-9c78-82d78aab411e"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Timeman1111/TPyGame.git&quot;,
+    &quot;accountId&quot;: &quot;6aada241-4b3a-4e9f-9c78-82d78aab411e&quot;
   }
-}]]></component>
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -109,7 +109,7 @@
       <option name="presentableId" value="Default" />
       <updated>1777781341358</updated>
       <workItem from="1777781342397" duration="4867000" />
-      <workItem from="1777787282349" duration="671000" />
+      <workItem from="1777787282349" duration="894000" />
     </task>
     <task id="LOCAL-00001" summary="Add PyCharm project configuration files">
       <option name="closed" value="true" />
@@ -175,7 +175,23 @@
       <option name="project" value="LOCAL" />
       <updated>1777783849017</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Add fallback for testing video download and adjust output size">
+      <option name="closed" value="true" />
+      <created>1777788041229</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1777788041229</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Add .gitignore to exclude build files and test artifacts">
+      <option name="closed" value="true" />
+      <created>1777788151713</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1777788151713</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -191,7 +207,9 @@
     <MESSAGE value="Add unit tests for `Screen` class functions and fix relative imports in `tpygame` package" />
     <MESSAGE value="Update PyCharm workspace settings to include Git push tags configuration" />
     <MESSAGE value="Update module docstrings for `tpygame` submodules and refine `render` file imports" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update module docstrings for `tpygame` submodules and refine `render` file imports" />
+    <MESSAGE value="Add fallback for testing video download and adjust output size" />
+    <MESSAGE value="Add .gitignore to exclude build files and test artifacts" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add .gitignore to exclude build files and test artifacts" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
