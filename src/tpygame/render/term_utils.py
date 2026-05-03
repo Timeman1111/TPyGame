@@ -68,7 +68,7 @@ def generate_back_color(color: tuple[int, int, int]):
     return f"\033[48;2;{color[0]};{color[1]};{color[2]}m"
 
 
-@lru_cache(maxsize=16384)
+@lru_cache(maxsize=32678)
 def build_pixel(
     top_color: tuple[int, int, int] = (0, 0, 0),
     bottom_color: tuple[int, int, int] = (0, 0, 0),
