@@ -6,8 +6,15 @@ The module includes methods to load images and a class to represent an image
 surface for rendering.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import numpy as np
 import cv2
+
+if TYPE_CHECKING:
+    from .parallel import ParallelConfig
 
 
 def load_img(img_path: str):
@@ -15,6 +22,52 @@ def load_img(img_path: str):
     img_arr = cv2.imread(img_path)  # pylint: disable=no-member
     img_rgb_arr = cv2.cvtColor(img_arr, cv2.COLOR_BGR2RGB)  # pylint: disable=no-member
     return img_rgb_arr
+
+
+def _build_pixels(scaled_array: np.ndarray, parallel: ParallelConfig | None) -> list:
+    """Convert a scaled H×W×3 numpy array to a flat list of ``(R, G, B)`` tuples.
+
+    When *parallel* is ``None`` or ``parallel.enabled`` is ``False``, the
+    existing single-threaded list-comprehension is used.  When parallel is
+    enabled the array is split into row-chunks and each chunk is converted
+    inside a worker process, then the results are concatenated.
+
+    Graceful degradation: if the process pool raises for any reason the
+    function falls back to the sequential path automatically.
+
+    :param scaled_array: Image array already resized to target dimensions.
+    :param parallel: Optional :class:`~tpygame.render.parallel.ParallelConfig`.
+    :return: Flat list of ``(R, G, B)`` integer tuples.
+    """
+    flat = scaled_array.reshape(-1, 3)
+
+    if parallel is None or not parallel.enabled:
+        return [tuple(x) for x in flat]
+
+    from .parallel import _worker_convert_chunk  # pylint: disable=import-outside-toplevel
+
+    height, width = scaled_array.shape[:2]
+    num_chunks = min(parallel.num_processes, height)
+    chunk_size = height // num_chunks
+
+    chunks_bytes = []
+    chunks_sizes = []
+    for i in range(num_chunks):
+        start = i * chunk_size
+        end = height if i == num_chunks - 1 else start + chunk_size
+        chunk = scaled_array[start:end].reshape(-1, 3)
+        chunks_bytes.append(chunk.tobytes())
+        chunks_sizes.append(chunk.shape[0])
+
+    try:
+        pool = parallel.get_process_pool()
+        results = list(pool.map(_worker_convert_chunk, chunks_bytes, chunks_sizes))
+        out = []
+        for part in results:
+            out.extend(part)
+        return out
+    except Exception:  # pylint: disable=broad-except
+        return [tuple(x) for x in flat]
 
 
 class ImageSurface:
@@ -29,6 +82,7 @@ class ImageSurface:
         width: int,
         height: int,
         image_array: np.ndarray,
+        parallel: ParallelConfig | None = None,
     ):
         """
         Initializes an ImageSurface.

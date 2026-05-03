@@ -14,9 +14,10 @@ Usage example::
     from tpygame.render.parallel import ParallelConfig
     from tpygame.render.screen import Screen
 
-    with ParallelConfig(enabled=True, num_processes=4) as cfg:
-        screen = Screen(parallel=cfg)
-        # ... render loop ...
+    cfg = ParallelConfig(enabled=True, num_processes=4)
+    screen = Screen(parallel=cfg)
+    # ... render loop ...
+    cfg.shutdown()
 """
 
 from __future__ import annotations
@@ -152,18 +153,21 @@ class ParallelConfig:
     threading.  All defaults (``enabled=False``) reproduce the existing
     single-threaded behaviour exactly.
 
-    The executor pools are created lazily on first use and can be shut down
-    explicitly via :meth:`shutdown` or via the context-manager protocol.
+    The executor pools are created lazily on first use and must be released
+    by calling :meth:`shutdown` when rendering is complete.
 
     Example::
 
-        with ParallelConfig(enabled=True, num_processes=4) as cfg:
+        cfg = ParallelConfig(enabled=True, num_processes=4)
+        try:
             screen = Screen(parallel=cfg)
             surface = ImageSurface(0, 0, 640, 480, img, parallel=cfg)
             while True:
                 surface.update(new_img)
                 surface.draw(screen)
                 screen.refresh()
+        finally:
+            cfg.shutdown()
 
     Attributes:
         enabled: Master switch.  When ``False`` pools are never created and
@@ -172,16 +176,11 @@ class ParallelConfig:
             conversion, frame comparison).  Defaults to :func:`os.cpu_count`.
         num_threads: Worker threads for I/O-adjacent tasks (ANSI string
             building in full-refresh).  Defaults to ``2``.
-        pixel_threshold: Minimum total pixel count below which process-pool
-            dispatch is skipped in favour of the sequential path.  Process-pool
-            startup overhead is rarely justified for small frames.
-            Defaults to ``100_000`` (~500 × 200 px).
     """
 
     enabled: bool = False
     num_processes: int = field(default_factory=lambda: os.cpu_count() or 1)
     num_threads: int = 2
-    pixel_threshold: int = 100_000  # ~500 × 200 pixels
 
     _process_pool: ProcessPoolExecutor | None = field(
         default=None, init=False, repr=False
@@ -211,6 +210,9 @@ class ParallelConfig:
     def shutdown(self, wait: bool = True) -> None:
         """Shut down both executor pools and release their resources.
 
+        Call this when rendering is complete to free worker processes and
+        threads.
+
         :param wait: If ``True`` (default) block until all pending futures
             finish before returning.
         """
@@ -220,9 +222,3 @@ class ParallelConfig:
         if self._thread_pool is not None:
             self._thread_pool.shutdown(wait=wait)
             self._thread_pool = None
-
-    def __enter__(self) -> "ParallelConfig":
-        return self
-
-    def __exit__(self, *_) -> None:
-        self.shutdown()
