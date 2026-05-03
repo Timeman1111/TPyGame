@@ -75,6 +75,28 @@ class ImageSurface:
     A surface that can display an image from a numpy array.
     """
 
+    @staticmethod
+    def _scale_image_array(image_array: np.ndarray, target_height: int, target_width: int) -> np.ndarray:
+        """
+        Scales an image array to target dimensions using nearest-neighbor interpolation.
+
+        :param image_array: Input image array (H, W, 3).
+        :param target_height: Target height in pixels.
+        :param target_width: Target width in pixels.
+        :return: Scaled image array (target_height, target_width, 3).
+        """
+        h, w = image_array.shape[:2]
+        if h == target_height and w == target_width:
+            return image_array
+
+        # Generate indices for nearest-neighbor interpolation
+        y_indices = (np.arange(target_height) * (h / target_height)).astype(int)
+        x_indices = (np.arange(target_width) * (w / target_width)).astype(int)
+        # Clip indices to ensure they are within bounds
+        y_indices = np.clip(y_indices, 0, h - 1)
+        x_indices = np.clip(x_indices, 0, w - 1)
+        return image_array[y_indices[:, None], x_indices]
+
     def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         x: int,
@@ -98,17 +120,7 @@ class ImageSurface:
         self.height = height
 
         # Efficiently resize the image to the target dimensions using nearest neighbor interpolation
-        h, w = image_array.shape[:2]
-        if h != height or w != width:
-            # Generate indices for interpolation
-            y_indices = (np.arange(height) * (h / height)).astype(int)
-            x_indices = (np.arange(width) * (w / width)).astype(int)
-            # Clip indices to ensure they are within bounds
-            y_indices = np.clip(y_indices, 0, h - 1)
-            x_indices = np.clip(x_indices, 0, w - 1)
-            scaled_array = image_array[y_indices[:, None], x_indices]
-        else:
-            scaled_array = image_array
+        scaled_array = self._scale_image_array(image_array, height, width)
 
         self._parallel = parallel
 
@@ -117,27 +129,31 @@ class ImageSurface:
         # across worker processes to reduce latency for large images.
         self.pixels = _build_pixels(scaled_array, parallel)
 
-    def draw(self, t_screen: 'Screen'):  # pylint: disable=too-many-locals
+    def _draw_sparse(self, t_screen: 'Screen'):
         """
-        Draws the image on the provided screen as efficiently as possible.
+        Draws the image onto a sparse (dictionary-based) screen frame.
+        Fallback path for non-flat frame storage.
+
         :param t_screen: The Screen object to draw on.
         """
-        f1 = t_screen.f1
-        if not f1.is_flat:
-            # Fallback for sparse frames
-            for i in range(self.height):
-                sy = self.y + i
-                if 0 <= sy < t_screen.height * 2:
-                    for j in range(self.width):
-                        sx = self.x + j
-                        if 0 <= sx < t_screen.width:
-                            t_screen[(sx, sy)] = self.pixels[i * self.width + j]
-            return
+        for i in range(self.height):
+            sy = self.y + i
+            if 0 <= sy < t_screen.height * 2:
+                for j in range(self.width):
+                    sx = self.x + j
+                    if 0 <= sx < t_screen.width:
+                        t_screen[(sx, sy)] = self.pixels[i * self.width + j]
 
-        # Direct access to the flat pixel list for speed
-        sw = f1.width
-        sh = f1.height
-        target_pixels = f1.pixels
+    def _draw_flat(self, t_screen: 'Screen'):
+        """
+        Draws the image onto a flat (list-based) screen frame.
+        Optimized path using direct list slicing for contiguous memory access.
+
+        :param t_screen: The Screen object to draw on.
+        """
+        sw = t_screen.f1.width
+        sh = t_screen.f1.height
+        target_pixels = t_screen.f1.pixels
 
         # Calculate overlap bounds
         start_y = max(0, self.y)
@@ -161,20 +177,27 @@ class ImageSurface:
                 self.pixels[img_offset: img_offset + copy_width]
             )
 
+    def draw(self, t_screen: 'Screen'):
+        """
+        Draws the image on the provided screen as efficiently as possible.
+        Dispatches to either sparse or flat implementation based on frame type.
+
+        :param t_screen: The Screen object to draw on.
+        """
+        f1 = t_screen.f1
+        if not f1.is_flat:
+            self._draw_sparse(t_screen)
+        else:
+            self._draw_flat(t_screen)
+
     def update(self, image_array: np.ndarray):
         """
         Updates the pixel buffer in-place from a new image array.
+        Automatically scales to match stored dimensions.
+
         :param image_array: A numpy array representing the image (H, W, 3).
         """
-        h, w = image_array.shape[:2]
-        if h != self.height or w != self.width:
-            y_indices = (np.arange(self.height) * (h / self.height)).astype(int)
-            x_indices = (np.arange(self.width) * (w / self.width)).astype(int)
-            y_indices = np.clip(y_indices, 0, h - 1)
-            x_indices = np.clip(x_indices, 0, w - 1)
-            scaled_array = image_array[y_indices[:, None], x_indices]
-        else:
-            scaled_array = image_array
+        scaled_array = self._scale_image_array(image_array, self.height, self.width)
 
         # Optimization: use _build_pixels so parallelism is used when available.
         # build_pixel in term_utils is cached and requires hashable tuples.

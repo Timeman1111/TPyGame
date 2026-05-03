@@ -112,6 +112,109 @@ class Screen:
         sys.stdout.write(text + end)
         sys.stdout.flush()
 
+    def _handle_terminal_resize(self):
+        """
+        Detects terminal resize and reallocates frames if needed.
+        :return: True if a resize occurred, False otherwise.
+        """
+        current_width, current_height = os.get_terminal_size()
+        if current_width != self.width or current_height != self.height:
+            self.width = current_width
+            self.height = current_height
+            self.p1 = Frame(self.width, self.height * 2)
+            self.f1 = Frame(self.width, self.height * 2)
+            self._first_refresh = True
+            return True
+        return False
+
+    def _build_full_frame_output(self) -> list[str]:
+        """
+        Builds ANSI escape sequences for a complete frame redraw.
+        Used when too many pixels have changed or on first refresh.
+
+        :return: List of string parts to be concatenated and written.
+        """
+        parts = [generate_move_string(0, 0)]
+        width = self.width
+        height = self.height
+        pixels = self.f1.pixels
+        parallel = self._parallel
+
+        if parallel is not None and parallel.enabled and height >= parallel.num_threads:
+            from .parallel import _worker_build_rows  # pylint: disable=import-outside-toplevel
+            thread_pool = parallel.get_thread_pool()
+            num_threads = max(1, min(parallel.num_threads, height))
+            chunk_size = height // num_threads
+            futures = []
+            for i in range(num_threads):
+                start = i * chunk_size
+                end = height if i == num_threads - 1 else start + chunk_size
+                futures.append(
+                    thread_pool.submit(_worker_build_rows, pixels, width, start, end)
+                )
+            for f in futures:
+                parts.append(f.result())
+        else:
+            for vy in range(height):
+                top_base = vy * 2 * width
+                bottom_base = top_base + width
+                row_parts = [
+                    build_pixel(pixels[top_base + x], pixels[bottom_base + x])
+                    for x in range(width)
+                ]
+                parts.append("".join(row_parts) + "\n")
+
+        parts.append("\033[0m")
+        return parts
+
+    def _build_partial_frame_output(self, changes: dict) -> list[str]:
+        """
+        Builds ANSI escape sequences for a partial frame update (changed cells only).
+        Optimizes output by skipping move sequences for adjacent cells.
+
+        :param changes: Dictionary mapping (x, vy) cell coords to (top_color, bottom_color).
+        :return: List of string parts to be concatenated and written.
+        """
+        parts = []
+        prev_vy = -1
+        prev_x = -1
+        for (x, vy), (top, bottom) in sorted(changes.items()):
+            if vy == prev_vy and x == prev_x + 1:
+                parts.append(build_pixel(top, bottom))
+            else:
+                parts.append(generate_move_string(x, vy) + build_pixel(top, bottom))
+            prev_vy = vy
+            prev_x = x
+        parts.append("\033[0m")
+        return parts
+
+    def _swap_frames_and_reset(self, changes: dict | None, truncated: bool):
+        """
+        Swaps frame buffers and resets f1, handling truncation logic.
+        When truncated, only sync drawn pixels from p1 to maintain terminal coherence.
+
+        :param changes: Dictionary of changed cells (None for full refresh).
+        :param truncated: Whether the partial refresh was truncated by bitrate.
+        """
+        if truncated and changes is not None:
+            # If truncated, p1 and terminal are out of sync.
+            # We must only update p1 for pixels we actually drew.
+            # After swap, p1 is the new state, f1 is the old state.
+            # We restore UNDRAWN pixels from f1 (old state) to p1 (new state).
+            self.p1, self.f1 = self.f1, self.p1
+
+            p1_pixels = self.p1.pixels
+            f1_pixels = self.f1.pixels
+            width = self.width
+            for (x, vy) in changes:
+                base = vy * 2 * width + x
+                p1_pixels[base] = f1_pixels[base]
+                p1_pixels[base + width] = f1_pixels[base + width]
+        else:
+            self.p1, self.f1 = self.f1, self.p1
+
+        self.f1.reset()
+
     def refresh(self, force_full: bool = False, bitrate: int = 0):
         """
         Refreshes the terminal screen by comparing the current frame with the previous one
@@ -127,24 +230,17 @@ class Screen:
         The cursor is hidden for the duration of the write and restored to its prior
         visible/hidden state afterwards.
         """
-        # Detect terminal resize
-        current_width, current_height = os.get_terminal_size()
-        if current_width != self.width or current_height != self.height:
-            self.width = current_width
-            self.height = current_height
-            self.p1 = Frame(self.width, self.height * 2)
-            self.f1 = Frame(self.width, self.height * 2)
-            self._first_refresh = True
+        # Detect terminal resize and reallocate frames if needed
+        self._handle_terminal_resize()
 
         if self._first_refresh:
             # Clear terminal on first refresh to ensure a clean state
-            # This helps avoid "spottiness" if the terminal background is not black.
-            # Use \033[H\033[2J to move to home and clear.
             sys.stdout.write("\033[H\033[2J")
 
         cursor_was_visible = self.is_cursor_visible
         parts = ["\033[?25l"]  # Hide cursor at the start of every refresh
 
+        # Determine if we need a full or partial refresh
         if force_full or self._first_refresh:
             do_full = True
             changes = None
@@ -154,49 +250,11 @@ class Screen:
             changes, truncated = self.f1.compare(self.p1, bitrate=bitrate, parallel=self._parallel)
             do_full = len(changes) > (self.width * self.height) // 2
 
+        # Build output based on refresh type
         if do_full:
-            # Full refresh — build output row by row (one terminal row = two pixel rows).
-            parts.append(generate_move_string(0, 0))
-            width = self.width
-            height = self.height
-            pixels = self.f1.pixels
-            parallel = self._parallel
-            if parallel is not None and parallel.enabled and height >= parallel.num_threads:
-                from .parallel import _worker_build_rows  # pylint: disable=import-outside-toplevel
-                thread_pool = parallel.get_thread_pool()
-                num_threads = max(1, min(parallel.num_threads, height))
-                chunk_size = height // num_threads
-                futures = []
-                for i in range(num_threads):
-                    start = i * chunk_size
-                    end = height if i == num_threads - 1 else start + chunk_size
-                    futures.append(
-                        thread_pool.submit(_worker_build_rows, pixels, width, start, end)
-                    )
-                for f in futures:
-                    parts.append(f.result())
-            else:
-                for vy in range(height):
-                    top_base = vy * 2 * width
-                    bottom_base = top_base + width
-                    row_parts = [
-                        build_pixel(pixels[top_base + x], pixels[bottom_base + x])
-                        for x in range(width)
-                    ]
-                    parts.append("".join(row_parts) + "\n")
-            parts.append("\033[0m")
+            parts.extend(self._build_full_frame_output())
         else:
-            # Partial refresh — sort by (vy, x) and skip move escapes for adjacent cells.
-            prev_vy = -1
-            prev_x = -1
-            for (x, vy), (top, bottom) in sorted(changes.items()):
-                if vy == prev_vy and x == prev_x + 1:
-                    parts.append(build_pixel(top, bottom))
-                else:
-                    parts.append(generate_move_string(x, vy) + build_pixel(top, bottom))
-                prev_vy = vy
-                prev_x = x
-            parts.append("\033[0m")
+            parts.extend(self._build_partial_frame_output(changes))
 
         # Move to bottom, restore cursor visibility, and emit everything in one syscall
         parts.append(generate_move_string(0, self.height - 1))
@@ -206,29 +264,7 @@ class Screen:
         sys.stdout.flush()
 
         # Swap frames and reset the new f1 in-place — no new Frame allocation
-        if truncated:
-            # If truncated, p1 and terminal are out of sync. 
-            # We must only update p1 for pixels we actually drew.
-            # Easiest way: p1 already has the old state. f1 has the new state.
-            # We want to move only the drawn pixels from f1 to p1.
-            # BUT we swap them below. So after swap, p1 is the new state, f1 is the old state.
-            # We then need to restore UNDRAWN pixels from f1 (old state) to p1 (new state).
-            self.p1, self.f1 = self.f1, self.p1
-            
-            p1_pixels = self.p1.pixels
-            f1_pixels = self.f1.pixels
-            width = self.width
-            for (x, vy) in changes:
-                base = vy * 2 * width + x
-                p1_pixels[base] = f1_pixels[base]
-                p1_pixels[base + width] = f1_pixels[base + width]
-            
-            # Now p1 correctly matches terminal (it was old p1, now updated with changes).
-            # f1 is still old p1. We can reset it.
-        else:
-            self.p1, self.f1 = self.f1, self.p1
-
-        self.f1.reset()
+        self._swap_frames_and_reset(changes, truncated)
 
     def move_to_bottom(self):
         """

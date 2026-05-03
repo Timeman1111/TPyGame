@@ -4,7 +4,7 @@ import sys
 import os
 
 # Add src to sys.path to import tpygame
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
 
 from tpygame.render.screen import Screen
 from tpygame.render.frame import Frame

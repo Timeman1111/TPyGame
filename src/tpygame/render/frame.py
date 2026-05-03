@@ -120,6 +120,46 @@ class Frame:
         else:
             self.pixels.clear()
 
+    def _compare_sequential(self, other: "Frame", bitrate: int, height_cells: int, width: int):
+        """
+        Sequential (single-threaded) frame comparison for changed cells.
+        Each cell (x, vy) covers two consecutive pixel rows.
+
+        Uses a random starting row when bitrate is set to avoid top-to-bottom
+        scanline bias during partial updates.
+
+        :param other: The previous frame to compare against.
+        :param bitrate: Maximum changed cells before early exit (0 = unlimited).
+        :param height_cells: Number of terminal-cell rows (height // 2).
+        :param width: Frame width in pixels.
+        :return: (changes, truncated) where changes is a dict and truncated is a bool.
+        """
+        changes = {}
+        self_pixels = self.pixels
+        other_pixels = other.pixels
+
+        # Use a random starting row to avoid top-to-bottom scanline bias when bitrate is low
+        start_vy = random.randint(0, height_cells - 1) if bitrate > 0 else 0
+
+        count = 0
+        for i in range(height_cells):
+            vy = (start_vy + i) % height_cells
+            base_idx = vy * 2 * width
+            idx2_offset = width
+            for x in range(width):
+                idx1 = base_idx + x
+                idx2 = idx1 + idx2_offset
+
+                p1_1, p1_2 = self_pixels[idx1], self_pixels[idx2]
+                p2_1, p2_2 = other_pixels[idx1], other_pixels[idx2]
+
+                if p1_1 != p2_1 or p1_2 != p2_2:
+                    changes[(x, vy)] = (p1_1, p1_2)
+                    count += 1
+                    if 0 < bitrate <= count:
+                        return changes, True
+        return changes, False
+
     def compare(self, other: "Frame", bitrate: int = 0, parallel: ParallelConfig | None = None):
         """
         Compares the current frame with another frame and returns a dictionary of changed cells.
@@ -148,29 +188,8 @@ class Frame:
                 return self._compare_parallel(other, bitrate, parallel, height_cells, width)
 
             # Sequential path
-            self_pixels = self.pixels
-            other_pixels = other.pixels
+            return self._compare_sequential(other, bitrate, height_cells, width)
 
-            # Use a random starting row to avoid top-to-bottom scanline bias when bitrate is low
-            start_vy = random.randint(0, height_cells - 1) if bitrate > 0 else 0
-
-            count = 0
-            for i in range(height_cells):
-                vy = (start_vy + i) % height_cells
-                base_idx = vy * 2 * width
-                idx2_offset = width
-                for x in range(width):
-                    idx1 = base_idx + x
-                    idx2 = idx1 + idx2_offset
-
-                    p1_1, p1_2 = self_pixels[idx1], self_pixels[idx2]
-                    p2_1, p2_2 = other_pixels[idx1], other_pixels[idx2]
-
-                    if p1_1 != p2_1 or p1_2 != p2_2:
-                        changes[(x, vy)] = (p1_1, p1_2)
-                        count += 1
-                        if 0 < bitrate <= count:
-                            return changes, True
         return changes, False
 
     def _compare_parallel(
