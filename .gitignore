@@ -1,4 +1,5 @@
 /src/TPyGame.egg-info/
 build/
 scripts/test_files
-.idea/
+.idea/__pycache__
+**/__pycache__/
