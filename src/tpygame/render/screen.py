@@ -1,8 +1,13 @@
 """Render: terminal display manager with frame buffering and pixel-level rendering."""
 
+from __future__ import annotations
+
 import os
 import sys
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from .parallel import ParallelConfig
 
 
 from .frame import Frame
@@ -20,14 +25,18 @@ class Screen:
     Manages the terminal display, including cursor control and frame refreshing.
     """
 
-    def __init__(self, last_pos: tuple[int, int] = (0, 0)):
+    def __init__(self, last_pos: tuple[int, int] = (0, 0), parallel: ParallelConfig | None = None):
         """
         Initializes the Screen.
         :param last_pos: Initial cursor position (y, x).
+        :param parallel: Optional :class:`~tpygame.render.parallel.ParallelConfig` for
+            parallel rendering.  Pass ``ParallelConfig(enabled=True)`` to use a thread
+            pool for full-frame refreshes and a process pool for frame comparison.
         """
         init_terminal()
         self.last_pos = last_pos
         self.width, self.height = os.get_terminal_size()
+        self._parallel = parallel
 
         self.p1: Frame = Frame(self.width, self.height * 2)
         self.f1: Frame = Frame(self.width, self.height * 2)
@@ -142,7 +151,7 @@ class Screen:
             truncated = False
             self._first_refresh = False
         else:
-            changes, truncated = self.f1.compare(self.p1, bitrate=bitrate)
+            changes, truncated = self.f1.compare(self.p1, bitrate=bitrate, parallel=self._parallel)
             do_full = len(changes) > (self.width * self.height) // 2
 
         if do_full:
@@ -151,14 +160,30 @@ class Screen:
             width = self.width
             height = self.height
             pixels = self.f1.pixels
-            for vy in range(height):
-                top_base = vy * 2 * width
-                bottom_base = top_base + width
-                row_parts = [
-                    build_pixel(pixels[top_base + x], pixels[bottom_base + x])
-                    for x in range(width)
-                ]
-                parts.append("".join(row_parts) + "\n")
+            parallel = self._parallel
+            if parallel is not None and parallel.enabled and height >= parallel.num_threads:
+                from .parallel import _worker_build_rows  # pylint: disable=import-outside-toplevel
+                thread_pool = parallel.get_thread_pool()
+                num_threads = max(1, min(parallel.num_threads, height))
+                chunk_size = height // num_threads
+                futures = []
+                for i in range(num_threads):
+                    start = i * chunk_size
+                    end = height if i == num_threads - 1 else start + chunk_size
+                    futures.append(
+                        thread_pool.submit(_worker_build_rows, pixels, width, start, end)
+                    )
+                for f in futures:
+                    parts.append(f.result())
+            else:
+                for vy in range(height):
+                    top_base = vy * 2 * width
+                    bottom_base = top_base + width
+                    row_parts = [
+                        build_pixel(pixels[top_base + x], pixels[bottom_base + x])
+                        for x in range(width)
+                    ]
+                    parts.append("".join(row_parts) + "\n")
             parts.append("\033[0m")
         else:
             # Partial refresh — sort by (vy, x) and skip move escapes for adjacent cells.
