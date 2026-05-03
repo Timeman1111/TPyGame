@@ -47,13 +47,19 @@ class Video:
         self._surface: ImageSurface | None = None
         self.cursor = 0
         self.cap = None
+        self.fps = 30  # Default fallback
 
         if source is not None:
             self.cap = cv2.VideoCapture(source)
-            if self.width is None:
-                self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            if self.height is None:
-                self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            if self.cap.isOpened():
+                if self.width is None:
+                    self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                if self.height is None:
+                    self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                
+                source_fps = self.cap.get(cv2.CAP_PROP_FPS)
+                if source_fps > 0:
+                    self.fps = source_fps
 
     def next_frame(self) -> bool:
         """
