@@ -2,16 +2,39 @@ import tpygame as tpy
 import requests
 import cv2
 import time
+import pathlib
+
+TEST_VIDEO_PATH = "scripts/test_files/random_video.mp4"
+
+def test_video():
+
+    if pathlib.Path(TEST_VIDEO_PATH).exists():
+        vid_cap = cv2.VideoCapture(TEST_VIDEO_PATH)
+        return vid_cap
+    else:
+        video_req = requests.get('https://lorem.video/240p')
+        if video_req.status_code != 200:
+            raise Exception("Failed to download video")
+        with open(TEST_VIDEO_PATH, 'wb') as f:
+            f.write(video_req.content)
+        test_video()
+
+    return
+
+
+
+
+
 
 def main():
     ts = tpy.render.Screen()
     size = 240
 
-    out_size = 0.5
+    out_size = 0.25
     video_position = (0, 0)
 
 
-    vid_cap = cv2.VideoCapture(f'https://lorem.video/{size}p')
+    vid_cap = test_video()
 
     fps = vid_cap.get(cv2.CAP_PROP_FPS)
 
@@ -43,8 +66,6 @@ def main():
         ts.refresh()
         ts.move_to_bottom()
 
-        wait = max(float(0), fps_wait_time)
-        time.sleep(wait)
 
 
 
