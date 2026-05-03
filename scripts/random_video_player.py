@@ -12,7 +12,7 @@ def test_video():
         vid_cap = cv2.VideoCapture(TEST_VIDEO_PATH)
         return vid_cap
     else:
-        video_req = requests.get('https://lorem.video/240p')
+        video_req = requests.get('https://lorem.video/360p')
         if video_req.status_code != 200:
             raise Exception("Failed to download video")
         with open(TEST_VIDEO_PATH, 'wb') as f:
@@ -24,7 +24,7 @@ def test_video():
 def main():
     ts = tpy.render.Screen()
 
-    out_size = 0.5
+    out_size = 0.25
     video_position = (0, 0)
 
     # Ensure test video exists
@@ -43,12 +43,19 @@ def main():
         width=width,
         height=height,
         source=TEST_VIDEO_PATH,
-        bitrate=4000
+        bitrate=30000
     )
 
     while vid.next_frame():
+        vid.move(1,0)
         vid.draw(ts)
         vid.refresh(ts)
+        time.sleep(0.01)
+
+        if vid.x > ts.width:
+            tpy.term_utils.clear()
+            vid.x = 0
+            vid.y += 1
 
 
 

@@ -130,9 +130,10 @@ class Screen:
         if force_full or self._first_refresh:
             do_full = True
             changes = None
+            truncated = False
             self._first_refresh = False
         else:
-            changes = self.f1.compare(self.p1, bitrate=bitrate)
+            changes, truncated = self.f1.compare(self.p1, bitrate=bitrate)
             do_full = len(changes) > (self.width * self.height) // 2
 
         if do_full:
@@ -171,7 +172,28 @@ class Screen:
         sys.stdout.flush()
 
         # Swap frames and reset the new f1 in-place — no new Frame allocation
-        self.p1, self.f1 = self.f1, self.p1
+        if truncated:
+            # If truncated, p1 and terminal are out of sync. 
+            # We must only update p1 for pixels we actually drew.
+            # Easiest way: p1 already has the old state. f1 has the new state.
+            # We want to move only the drawn pixels from f1 to p1.
+            # BUT we swap them below. So after swap, p1 is the new state, f1 is the old state.
+            # We then need to restore UNDRAWN pixels from f1 (old state) to p1 (new state).
+            self.p1, self.f1 = self.f1, self.p1
+            
+            p1_pixels = self.p1.pixels
+            f1_pixels = self.f1.pixels
+            width = self.width
+            for (x, vy) in changes:
+                base = vy * 2 * width + x
+                p1_pixels[base] = f1_pixels[base]
+                p1_pixels[base + width] = f1_pixels[base + width]
+            
+            # Now p1 correctly matches terminal (it was old p1, now updated with changes).
+            # f1 is still old p1. We can reset it.
+        else:
+            self.p1, self.f1 = self.f1, self.p1
+
         self.f1.reset()
 
     def move_to_bottom(self):

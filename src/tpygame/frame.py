@@ -118,6 +118,7 @@ class Frame:
         Each cell (x, vy) corresponds to two pixels.
         :param other: The previous frame to compare against.
         :param bitrate: The maximum number of changed cells to return.
+        :return: (changes, truncated) where changes is a dict and truncated is a bool.
         """
         changes = {}
         if (
@@ -131,8 +132,14 @@ class Frame:
             other_pixels = other.pixels
             width = self.width
             
+            # Use a random starting row to avoid top-to-bottom scanline bias when bitrate is low
+            import random
+            height_cells = self.height // 2
+            start_vy = random.randint(0, height_cells - 1) if bitrate > 0 else 0
+            
             count = 0
-            for vy in range(self.height // 2):
+            for i in range(height_cells):
+                vy = (start_vy + i) % height_cells
                 base_idx = vy * 2 * width
                 idx2_offset = width
                 for x in range(width):
@@ -146,5 +153,5 @@ class Frame:
                         changes[(x, vy)] = (p1_1, p1_2)
                         count += 1
                         if 0 < bitrate <= count:
-                            return changes
-        return changes
+                            return changes, True
+        return changes, False

@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Refactor video rendering and frame comparison for improved performance and scalability.">
+    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Remove `color_closeness` parameter and refactor frame comparison logic for better clarity and performance.">
       <change beforePath="$PROJECT_DIR$/.idea/TPyGame.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TPyGame.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/random_video_player.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/random_video_player.py" afterDir="false" />
@@ -120,7 +120,7 @@
       <option name="presentableId" value="Default" />
       <updated>1777781341358</updated>
       <workItem from="1777781342397" duration="4867000" />
-      <workItem from="1777787282349" duration="2573000" />
+      <workItem from="1777787282349" duration="3116000" />
     </task>
     <task id="LOCAL-00001" summary="Add PyCharm project configuration files">
       <option name="closed" value="true" />
@@ -242,7 +242,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777789327888</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Remove `color_closeness` parameter and refactor frame comparison logic for better clarity and performance.">
+      <option name="closed" value="true" />
+      <created>1777789974784</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1777789974784</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -265,6 +273,7 @@
     <MESSAGE value="Refactor `random_video_player.py` to optimize screen refresh and clean unused variables; update `.idea/workspace.xml` to refine metadata" />
     <MESSAGE value="Bump project version to `0.0.3` in `pyproject.toml` and update `.idea/workspace.xml` to refine metadata." />
     <MESSAGE value="Refactor video rendering and frame comparison for improved performance and scalability." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor video rendering and frame comparison for improved performance and scalability." />
+    <MESSAGE value="Remove `color_closeness` parameter and refactor frame comparison logic for better clarity and performance." />
+    <option name="LAST_COMMIT_MESSAGE" value="Remove `color_closeness` parameter and refactor frame comparison logic for better clarity and performance." />
   </component>
 </project>
