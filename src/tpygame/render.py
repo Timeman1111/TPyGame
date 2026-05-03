@@ -3,10 +3,8 @@
 import os
 import random
 import sys
-from collections import deque
 
-import numpy as np
-import cv2
+
 
 from frame import Frame
 from term_utils import (

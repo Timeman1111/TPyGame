@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Add initial project setup with `pyproject.toml` and terminal utilities for ANSI escape support" />
+    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Update PyCharm workspace settings and add JSON schema configuration for `pyproject.toml`">
+      <change afterPath="$PROJECT_DIR$/src/tpygame/frame.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/tpygame/image.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/tpygame/video.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/render.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/render.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -99,7 +107,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1777781341358</updated>
-      <workItem from="1777781342397" duration="842000" />
+      <workItem from="1777781342397" duration="1551000" />
     </task>
     <task id="LOCAL-00001" summary="Add PyCharm project configuration files">
       <option name="closed" value="true" />
@@ -125,7 +133,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777782183786</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Update PyCharm workspace settings and add JSON schema configuration for `pyproject.toml`">
+      <option name="closed" value="true" />
+      <created>1777782203484</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1777782203484</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -135,6 +151,8 @@
     <MESSAGE value="Add PyCharm project configuration files" />
     <MESSAGE value="Remove sample Python script and update project configuration files" />
     <MESSAGE value="Add initial project setup with `pyproject.toml` and terminal utilities for ANSI escape support" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add initial project setup with `pyproject.toml` and terminal utilities for ANSI escape support" />
+    <MESSAGE value="Add JSON schema mappings in PyCharm project configuration" />
+    <MESSAGE value="Update PyCharm workspace settings and add JSON schema configuration for `pyproject.toml`" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update PyCharm workspace settings and add JSON schema configuration for `pyproject.toml`" />
   </component>
 </project>
