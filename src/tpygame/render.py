@@ -32,6 +32,10 @@ class Screen:
         self.p1: Frame = Frame(self.width, self.height * 2)
         self.f1: Frame = Frame(self.width, self.height * 2)
 
+        # Force the first refresh to be a full redraw to avoid "spottiness"
+        # when the initial terminal state is not black.
+        self._first_refresh = True
+
         self.is_cursor_visible = True
 
     def hide_cursor(self):
@@ -99,7 +103,7 @@ class Screen:
         sys.stdout.write(text + end)
         sys.stdout.flush()
 
-    def refresh(self, force_full: bool = False, color_closeness: int = 0, bitrate: int = 0):
+    def refresh(self, force_full: bool = False, bitrate: int = 0):
         """
         Refreshes the terminal screen by comparing the current frame with the previous one
         and outputting only the changes, or a full refresh if too many changes occur.
@@ -108,21 +112,27 @@ class Screen:
         written — use this when the caller knows every pixel has changed (e.g. video).
 
         :param force_full: Whether to force a full redraw.
-        :param color_closeness: Tolerance for color difference when comparing frames.
         :param bitrate: Maximum number of cells to update in a partial refresh.
 
         All output is batched into a single write + flush to minimise I/O syscalls.
         The cursor is hidden for the duration of the write and restored to its prior
         visible/hidden state afterwards.
         """
+        if self._first_refresh:
+            # Clear terminal on first refresh to ensure a clean state
+            # This helps avoid "spottiness" if the terminal background is not black.
+            # Use \033[H\033[2J to move to home and clear.
+            sys.stdout.write("\033[H\033[2J")
+
         cursor_was_visible = self.is_cursor_visible
         parts = ["\033[?25l"]  # Hide cursor at the start of every refresh
 
-        if force_full:
+        if force_full or self._first_refresh:
             do_full = True
             changes = None
+            self._first_refresh = False
         else:
-            changes = self.f1.compare(self.p1, color_closeness=color_closeness, bitrate=bitrate)
+            changes = self.f1.compare(self.p1, bitrate=bitrate)
             do_full = len(changes) > (self.width * self.height) // 2
 
         if do_full:

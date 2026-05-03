@@ -25,7 +25,6 @@ class Video:
         width: int | None = None,
         height: int | None = None,
         source: str | int | None = None,
-        color_closeness: int = 0,
         bitrate: int = 0
     ):
         """
@@ -35,14 +34,12 @@ class Video:
         :param width: Target width (if None and source exists, uses source width).
         :param height: Target height (if None and source exists, uses source height).
         :param source: Path to video file or camera index.
-        :param color_closeness: Tolerance for color similarity in rendering.
         :param bitrate: Maximum pixels to update per frame in partial refresh.
         """
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.color_closeness = color_closeness
         self.bitrate = bitrate
         self._surface: ImageSurface | None = None
         self.cursor = 0
@@ -104,11 +101,10 @@ class Video:
 
     def refresh(self, t_screen: 'Screen', force_full: bool = False):
         """
-        Helper to refresh the screen with this video's closeness/bitrate settings.
+        Helper to refresh the screen with this video's bitrate settings.
         """
         t_screen.refresh(
             force_full=force_full,
-            color_closeness=self.color_closeness,
             bitrate=self.bitrate
         )
 

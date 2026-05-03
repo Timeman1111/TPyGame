@@ -112,12 +112,11 @@ class Frame:
         else:
             self.pixels.clear()
 
-    def compare(self, other: "Frame", color_closeness: int = 0, bitrate: int = 0):
+    def compare(self, other: "Frame", bitrate: int = 0):
         """
         Compares the current frame with another frame and returns a dictionary of changed cells.
         Each cell (x, vy) corresponds to two pixels.
         :param other: The previous frame to compare against.
-        :param color_closeness: The threshold for color difference (sum of absolute differences).
         :param bitrate: The maximum number of changed cells to return.
         """
         changes = {}
@@ -143,14 +142,7 @@ class Frame:
                     p1_1, p1_2 = self_pixels[idx1], self_pixels[idx2]
                     p2_1, p2_2 = other_pixels[idx1], other_pixels[idx2]
 
-                    if color_closeness == 0:
-                        changed = (p1_1 != p2_1 or p1_2 != p2_2)
-                    else:
-                        diff1 = abs(p1_1[0]-p2_1[0]) + abs(p1_1[1]-p2_1[1]) + abs(p1_1[2]-p2_1[2])
-                        diff2 = abs(p1_2[0]-p2_2[0]) + abs(p1_2[1]-p2_2[1]) + abs(p1_2[2]-p2_2[2])
-                        changed = (diff1 > color_closeness or diff2 > color_closeness)
-
-                    if changed:
+                    if p1_1 != p2_1 or p1_2 != p2_2:
                         changes[(x, vy)] = (p1_1, p1_2)
                         count += 1
                         if 0 < bitrate <= count:

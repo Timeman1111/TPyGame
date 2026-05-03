@@ -24,7 +24,7 @@ def test_video():
 def main():
     ts = tpy.render.Screen()
 
-    out_size = 0.25
+    out_size = 0.5
     video_position = (0, 0)
 
     # Ensure test video exists
@@ -43,8 +43,7 @@ def main():
         width=width,
         height=height,
         source=TEST_VIDEO_PATH,
-        color_closeness=15,
-        bitrate=2000
+        bitrate=4000
     )
 
     while vid.next_frame():
