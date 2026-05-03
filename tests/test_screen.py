@@ -6,12 +6,12 @@ import os
 # Add src to sys.path to import tpygame
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from tpygame.render import Screen
-from tpygame.frame import Frame
+from tpygame.render.screen import Screen
+from tpygame.render.frame import Frame
 
 @pytest.fixture
 def mock_terminal():
-    with patch('tpygame.render.init_terminal') as mock_init, \
+    with patch('tpygame.render.screen.init_terminal') as mock_init, \
          patch('os.get_terminal_size', return_value=(80, 24)) as mock_size, \
          patch('sys.stdout.write') as mock_write, \
          patch('sys.stdout.flush') as mock_flush:
@@ -38,12 +38,12 @@ def test_init(mock_terminal):
 def test_cursor_visibility(mock_terminal):
     screen = Screen()
     
-    with patch('tpygame.render.hide_cursor') as mock_hide:
+    with patch('tpygame.render.screen.hide_cursor') as mock_hide:
         screen.hide_cursor()
         mock_hide.assert_called_once()
         assert screen.is_cursor_visible is False
         
-    with patch('tpygame.render.show_cursor') as mock_show:
+    with patch('tpygame.render.screen.show_cursor') as mock_show:
         screen.show_cursor()
         mock_show.assert_called_once()
         assert screen.is_cursor_visible is True
@@ -88,7 +88,7 @@ def test_draw_line(mock_terminal):
     for y in range(10, 16):
         assert screen[(10, y)] == color
 
-@patch('tpygame.render.build_pixel', return_value="X")
+@patch('tpygame.render.screen.build_pixel', return_value="X")
 def test_refresh_full(mock_build, mock_terminal):
     screen = Screen()
     # Force full refresh by setting many pixels
@@ -99,11 +99,16 @@ def test_refresh_full(mock_build, mock_terminal):
         written = mock_terminal['write'].call_args[0][0]
         assert "\033[1;1H" in written  # home cursor is embedded in the batch
 
-@patch('tpygame.render.build_pixel', return_value="P")
+@patch('tpygame.render.screen.build_pixel', return_value="P")
 def test_refresh_partial(mock_build, mock_terminal):
     screen = Screen()
+    # Consume the first refresh
+    screen.refresh()
+    # Reset mock_terminal['write'] to clear the output from the first refresh
+    mock_terminal['write'].reset_mock()
+    
     # Force partial refresh by setting few pixels
-    with patch.object(Frame, 'compare', return_value={(5, 5): ((255,0,0), (0,255,0))}):
+    with patch.object(Frame, 'compare', return_value=({(5, 5): ((255,0,0), (0,255,0))}, False)):
         screen.refresh()
         # All output is batched into a single sys.stdout.write call.
         written = mock_terminal['write'].call_args[0][0]
