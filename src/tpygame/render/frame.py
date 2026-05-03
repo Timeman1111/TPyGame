@@ -1,5 +1,13 @@
 """Frame: pixel buffer for terminal rendering, supporting flat and sparse storage."""
 
+from __future__ import annotations
+
+import random
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .parallel import ParallelConfig
+
 
 class Frame:
     """
@@ -112,12 +120,14 @@ class Frame:
         else:
             self.pixels.clear()
 
-    def compare(self, other: "Frame", bitrate: int = 0):
+    def compare(self, other: "Frame", bitrate: int = 0, parallel: ParallelConfig | None = None):
         """
         Compares the current frame with another frame and returns a dictionary of changed cells.
         Each cell (x, vy) corresponds to two pixels.
         :param other: The previous frame to compare against.
         :param bitrate: The maximum number of changed cells to return.
+        :param parallel: Optional :class:`~tpygame.render.parallel.ParallelConfig`.  When
+            enabled, the comparison is distributed across worker processes.
         :return: (changes, truncated) where changes is a dict and truncated is a bool.
         """
         changes = {}
@@ -127,16 +137,23 @@ class Frame:
             and self.width == other.width
             and self.height == other.height
         ):
-            # Optimize for terminal cell comparison (2 pixels at a time)
+            height_cells = self.height // 2
+            width = self.width
+
+            if (
+                parallel is not None
+                and parallel.enabled
+                and height_cells >= parallel.num_processes
+            ):
+                return self._compare_parallel(other, bitrate, parallel, height_cells, width)
+
+            # Sequential path
             self_pixels = self.pixels
             other_pixels = other.pixels
-            width = self.width
-            
+
             # Use a random starting row to avoid top-to-bottom scanline bias when bitrate is low
-            import random
-            height_cells = self.height // 2
             start_vy = random.randint(0, height_cells - 1) if bitrate > 0 else 0
-            
+
             count = 0
             for i in range(height_cells):
                 vy = (start_vy + i) % height_cells
@@ -154,4 +171,57 @@ class Frame:
                         count += 1
                         if 0 < bitrate <= count:
                             return changes, True
+        return changes, False
+
+    def _compare_parallel(
+        self,
+        other: "Frame",
+        bitrate: int,
+        parallel: ParallelConfig,
+        height_cells: int,
+        width: int,
+    ):
+        """Parallel implementation of :meth:`compare` using a process pool.
+
+        Splits the frame into horizontal strips and dispatches each strip to a
+        worker process via :func:`~tpygame.render.parallel._worker_compare_chunk`.
+        The full pixel buffers are converted to numpy byte arrays once upfront to
+        avoid redundant allocations per chunk.
+        """
+        import numpy as np  # pylint: disable=import-outside-toplevel
+        from .parallel import _worker_compare_chunk  # pylint: disable=import-outside-toplevel
+
+        num_proc = min(parallel.num_processes, height_cells)
+        chunk_size = height_cells // num_proc
+        pool = parallel.get_process_pool()
+
+        # Convert entire buffers to numpy arrays once to avoid per-chunk allocation
+        self_arr = np.array(self.pixels, dtype=np.uint8).reshape(self.height, width, 3)
+        other_arr = np.array(other.pixels, dtype=np.uint8).reshape(other.height, width, 3)
+
+        futures = []
+        for i in range(num_proc):
+            start_vy = i * chunk_size
+            end_vy = height_cells if i == num_proc - 1 else start_vy + chunk_size
+            futures.append(
+                pool.submit(
+                    _worker_compare_chunk,
+                    self_arr[start_vy * 2 : end_vy * 2].tobytes(),
+                    other_arr[start_vy * 2 : end_vy * 2].tobytes(),
+                    width,
+                    start_vy,
+                    end_vy,
+                    0,  # per-chunk bitrate disabled; enforce in main process
+                )
+            )
+
+        changes: dict = {}
+        for f in futures:
+            chunk_changes, _ = f.result()
+            changes.update(chunk_changes)
+            if 0 < bitrate <= len(changes):
+                # Cancel any pending futures and return early
+                for pending in futures:
+                    pending.cancel()
+                return changes, True
         return changes, False

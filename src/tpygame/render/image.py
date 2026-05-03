@@ -110,10 +110,12 @@ class ImageSurface:
         else:
             scaled_array = image_array
 
-        # Pre-convert to a flat list of tuples for maximum drawing efficiency
-        # Optimization: use a list comprehension for faster conversion from numpy to tuples
-        # build_pixel in term_utils is cached and requires hashable tuples.
-        self.pixels = [tuple(x) for x in scaled_array.reshape(-1, 3)]
+        self._parallel = parallel
+
+        # Pre-convert to a flat list of tuples for maximum drawing efficiency.
+        # When a ParallelConfig is provided and enabled, the conversion is spread
+        # across worker processes to reduce latency for large images.
+        self.pixels = _build_pixels(scaled_array, parallel)
 
     def draw(self, t_screen: 'Screen'):  # pylint: disable=too-many-locals
         """
@@ -174,9 +176,9 @@ class ImageSurface:
         else:
             scaled_array = image_array
 
-        # Optimization: use a list comprehension for faster conversion from numpy to tuples
+        # Optimization: use _build_pixels so parallelism is used when available.
         # build_pixel in term_utils is cached and requires hashable tuples.
-        self.pixels[:] = [tuple(x) for x in scaled_array.reshape(-1, 3)]
+        self.pixels[:] = _build_pixels(scaled_array, self._parallel)
 
     def move(self, x_pos: int, y_pos: int):
         """Shift the surface's position by (x_pos, y_pos)."""
