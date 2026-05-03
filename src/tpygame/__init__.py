@@ -1,6 +1,6 @@
 
-import image
-import frame
-import render
-import term_utils
-import video
+from . import image
+from . import frame
+from . import render
+from . import term_utils
+from . import video

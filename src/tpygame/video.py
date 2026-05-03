@@ -1,7 +1,7 @@
 
 from collections import deque
 import numpy as np
-from image import ImageSurface
+from .image import ImageSurface
 
 
 class Video:

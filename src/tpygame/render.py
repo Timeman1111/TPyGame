@@ -6,8 +6,8 @@ import sys
 
 
 
-from frame import Frame
-from term_utils import (
+from .frame import Frame
+from .term_utils import (
     init_terminal,
     clear,
     hide_cursor,

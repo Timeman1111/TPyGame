@@ -4,14 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Update PyCharm workspace settings and add JSON schema configuration for `pyproject.toml`">
-      <change afterPath="$PROJECT_DIR$/src/tpygame/frame.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/tpygame/image.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/tpygame/video.py" afterDir="false" />
+    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Implement `Frame`, `ImageSurface`, and `Video` classes; update project structure for rendering and terminal pixel manipulation">
+      <change afterPath="$PROJECT_DIR$/tests/test_screen.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tpygame/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tpygame/render.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/render.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/video.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/video.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -107,7 +105,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1777781341358</updated>
-      <workItem from="1777781342397" duration="1551000" />
+      <workItem from="1777781342397" duration="1833000" />
     </task>
     <task id="LOCAL-00001" summary="Add PyCharm project configuration files">
       <option name="closed" value="true" />
@@ -141,7 +139,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777782203484</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Implement `Frame`, `ImageSurface`, and `Video` classes; update project structure for rendering and terminal pixel manipulation">
+      <option name="closed" value="true" />
+      <created>1777782916994</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1777782916994</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -153,6 +159,7 @@
     <MESSAGE value="Add initial project setup with `pyproject.toml` and terminal utilities for ANSI escape support" />
     <MESSAGE value="Add JSON schema mappings in PyCharm project configuration" />
     <MESSAGE value="Update PyCharm workspace settings and add JSON schema configuration for `pyproject.toml`" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update PyCharm workspace settings and add JSON schema configuration for `pyproject.toml`" />
+    <MESSAGE value="Implement `Frame`, `ImageSurface`, and `Video` classes; update project structure for rendering and terminal pixel manipulation" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement `Frame`, `ImageSurface`, and `Video` classes; update project structure for rendering and terminal pixel manipulation" />
   </component>
 </project>
