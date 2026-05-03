@@ -118,6 +118,15 @@ class Screen:
         The cursor is hidden for the duration of the write and restored to its prior
         visible/hidden state afterwards.
         """
+        # Detect terminal resize
+        current_width, current_height = os.get_terminal_size()
+        if current_width != self.width or current_height != self.height:
+            self.width = current_width
+            self.height = current_height
+            self.p1 = Frame(self.width, self.height * 2)
+            self.f1 = Frame(self.width, self.height * 2)
+            self._first_refresh = True
+
         if self._first_refresh:
             # Clear terminal on first refresh to ensure a clean state
             # This helps avoid "spottiness" if the terminal background is not black.

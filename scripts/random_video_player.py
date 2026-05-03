@@ -22,9 +22,9 @@ def test_video():
     return
 
 def main():
-    ts = tpy.render.Screen()
+    ts = tpy.render.screen.Screen()
 
-    out_size = 0.25
+    out_size = 0.5
     video_position = (0, 0)
 
     # Ensure test video exists
@@ -37,7 +37,7 @@ def main():
     vid_cap.release()
 
     # Use the new Video class features
-    vid = tpy.video.Video(
+    vid = tpy.render.video.Video(
         x=video_position[0],
         y=video_position[1],
         width=width,
@@ -47,15 +47,11 @@ def main():
     )
 
     while vid.next_frame():
-        vid.move(1,0)
+
+
         vid.draw(ts)
         vid.refresh(ts)
-        time.sleep(0.01)
 
-        if vid.x > ts.width:
-            tpy.term_utils.clear()
-            vid.x = 0
-            vid.y += 1
 
 
 
@@ -66,4 +62,4 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        tpy.term_utils.clear()
+        tpy.render.term_utils.clear()

@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Remove `color_closeness` parameter and refactor frame comparison logic for better clarity and performance.">
+    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Refactor `random_video_player.py` for smoother playback and enhanced frame comparison; optimize bitrate handling and address potential rendering sync issues.">
+      <change afterPath="$PROJECT_DIR$/src/tpygame/render/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/TPyGame.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TPyGame.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/random_video_player.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/random_video_player.py" afterDir="false" />
@@ -13,8 +14,12 @@
       <change beforePath="$PROJECT_DIR$/src/TPyGame.egg-info/dependency_links.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/TPyGame.egg-info/requires.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/TPyGame.egg-info/top_level.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tpygame/frame.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/frame.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tpygame/render.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/render.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/frame.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/render/frame.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/image.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/render/image.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/render.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/render/screen.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/term_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/render/term_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/video.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/render/video.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,36 +75,37 @@
     <option name="showExcludedFiles" value="false" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "master",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "C:/Users/Ethan Small/PycharmProjects/TPyGame",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Ethan Small/PycharmProjects/TPyGame&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Ethan Small\PycharmProjects\TPyGame" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/tpygame/render" />
       <recent name="C:\Users\Ethan Small\PycharmProjects\TPyGame\src" />
       <recent name="C:\Users\Ethan Small\PycharmProjects\TPyGame" />
     </key>
@@ -120,7 +126,7 @@
       <option name="presentableId" value="Default" />
       <updated>1777781341358</updated>
       <workItem from="1777781342397" duration="4867000" />
-      <workItem from="1777787282349" duration="3116000" />
+      <workItem from="1777787282349" duration="3821000" />
     </task>
     <task id="LOCAL-00001" summary="Add PyCharm project configuration files">
       <option name="closed" value="true" />
@@ -250,7 +256,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777789974784</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Refactor `random_video_player.py` for smoother playback and enhanced frame comparison; optimize bitrate handling and address potential rendering sync issues.">
+      <option name="closed" value="true" />
+      <created>1777790528103</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1777790528103</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -274,6 +288,7 @@
     <MESSAGE value="Bump project version to `0.0.3` in `pyproject.toml` and update `.idea/workspace.xml` to refine metadata." />
     <MESSAGE value="Refactor video rendering and frame comparison for improved performance and scalability." />
     <MESSAGE value="Remove `color_closeness` parameter and refactor frame comparison logic for better clarity and performance." />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove `color_closeness` parameter and refactor frame comparison logic for better clarity and performance." />
+    <MESSAGE value="Refactor `random_video_player.py` for smoother playback and enhanced frame comparison; optimize bitrate handling and address potential rendering sync issues." />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor `random_video_player.py` for smoother playback and enhanced frame comparison; optimize bitrate handling and address potential rendering sync issues." />
   </component>
 </project>

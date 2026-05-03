@@ -25,7 +25,8 @@ class Video:
         width: int | None = None,
         height: int | None = None,
         source: str | int | None = None,
-        bitrate: int = 0
+        bitrate: int = 0,
+        auto_resize: bool = False
     ):
         """
         Initializes the Video object.
@@ -35,12 +36,14 @@ class Video:
         :param height: Target height (if None and source exists, uses source height).
         :param source: Path to video file or camera index.
         :param bitrate: Maximum pixels to update per frame in partial refresh.
+        :param auto_resize: If True, automatically resizes to terminal dimensions on every frame.
         """
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.bitrate = bitrate
+        self.auto_resize = auto_resize
         self._surface: ImageSurface | None = None
         self.cursor = 0
         self.cap = None
@@ -57,6 +60,12 @@ class Video:
         Reads the next frame from the source, if it exists.
         :return: True if a frame was read, False otherwise.
         """
+        if self.auto_resize:
+            import os
+            tw, th = os.get_terminal_size()
+            self.width = tw
+            self.height = th * 2
+
         if self.cap is None or not self.cap.isOpened():
             return False
         ret, frame = self.cap.read()
@@ -84,6 +93,10 @@ class Video:
                 self.height = img.shape[0]
             self._surface = ImageSurface(self.x, self.y, self.width, self.height, img)
         else:
+            # Ensure surface dimensions match Video object's current dimensions
+            if self.width is not None and self.height is not None:
+                self._surface.width = self.width
+                self._surface.height = self.height
             self._surface.update(img)
 
     def draw(self, t_screen: 'Screen'):
