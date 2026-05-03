@@ -1,0 +1,21 @@
+[build-system]
+
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "TPyGame"
+version = "0.0.1"
+description = "A project using NumPy and OpenCV"
+readme = "README.md"
+requires-python = ">=3.14"
+license = {text = "MIT"}  # Or your chosen license
+
+# Define your dependencies here
+dependencies = [
+    "numpy>=2.4.4",
+    "opencv-python>=4.13.0.92",
+]
+
+[project.urls]
+Homepage = "https://github.com/Timeman1111/TPyGame"
