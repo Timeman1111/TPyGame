@@ -108,6 +108,27 @@ class ImageSurface:
                 self.pixels[img_offset: img_offset + copy_width]
             )
 
+    def update(self, image_array: np.ndarray):
+        """
+        Updates the pixel buffer in-place from a new image array.
+        Reuses the existing list to avoid allocating a new ImageSurface per frame.
+        :param image_array: A numpy array representing the image (H, W, 3).
+        """
+        h, w = image_array.shape[:2]
+        if h != self.height or w != self.width:
+            y_indices = (np.arange(self.height) * (h / self.height)).astype(int)
+            x_indices = (np.arange(self.width) * (w / self.width)).astype(int)
+            y_indices = np.clip(y_indices, 0, h - 1)
+            x_indices = np.clip(x_indices, 0, w - 1)
+            scaled_array = image_array[y_indices[:, None], x_indices]
+        else:
+            scaled_array = image_array
+        self.pixels[:] = [
+            tuple(scaled_array[py, px])
+            for py in range(self.height)
+            for px in range(self.width)
+        ]
+
     def move(self, x_pos: int, y_pos: int):
         """Shift the surface's position by (x_pos, y_pos)."""
         self.x += x_pos

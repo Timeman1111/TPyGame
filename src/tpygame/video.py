@@ -1,20 +1,22 @@
 """
-Manages a sequence of image frames and renders them using ImageSurface.
+Manages a video frame source and renders it using a reusable ImageSurface.
 
-This module provides the `Video` class to handle a queue of image frames by transforming
-them into `ImageSurface` objects for efficient rendering. It includes functionality
-to input frames, render them on a target screen, reset the rendering state, and move
-the rendering position on the screen.
+This module provides the `Video` class, which keeps a single `ImageSurface` whose
+pixel buffer is updated in-place on every `input()` call.  This eliminates the
+per-frame allocation of a new surface and pixel list that would otherwise create
+GC pressure at video framerates.
 """
 
-from collections import deque
 import numpy as np
 from .image import ImageSurface
 
 
 class Video:
     """
-    Manages a queue of image frames and renders them sequentially using ImageSurface.
+    Renders video frames onto a Screen using a single reusable ImageSurface.
+
+    Frames are written into the surface's pixel buffer in-place, so no new
+    list or object is allocated between frames.
     """
 
     def __init__(self, x: int, y: int, width: int, height: int):
@@ -29,35 +31,30 @@ class Video:
         self.y = y
         self.width = width
         self.height = height
-        self.queue = deque()
+        self._surface: ImageSurface | None = None
         self.cursor = 0
 
     def input(self, img: np.ndarray):
         """
-        Adds a new frame to the video queue.
+        Loads a new frame into the reusable surface buffer.
         :param img: A numpy array representing the image frame.
         """
-        # Pre-process the image into an ImageSurface for efficient rendering.
-        # This handles resizing once upon input.
-        surface = ImageSurface(self.x, self.y, self.width, self.height, img)
-        self.queue.append(surface)
+        if self._surface is None:
+            self._surface = ImageSurface(self.x, self.y, self.width, self.height, img)
+        else:
+            self._surface.update(img)
 
     def draw(self, t_screen: 'Screen'):
         """
-        Renders the next frame from the queue and advances the cursor.
+        Renders the current frame onto the screen and advances the cursor.
         :param t_screen: The Screen object to draw on.
         """
-        if not self.queue:
+        if self._surface is None:
             return
 
-        # Get the next frame (FIFO)
-        surface = self.queue.popleft()
-
-        # Ensure it's drawn at the Video's current coordinates
-        surface.x = self.x
-        surface.y = self.y
-
-        surface.draw(t_screen)
+        self._surface.x = self.x
+        self._surface.y = self.y
+        self._surface.draw(t_screen)
         self.cursor += 1
 
     def reset(self):
@@ -73,8 +70,6 @@ class Video:
         :param y: The offset by which the y-coordinate should be incremented.
         :return: None
         """
-
         self.x += x
         self.y += y
-
 
