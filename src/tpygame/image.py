@@ -57,12 +57,9 @@ class ImageSurface:
             scaled_array = image_array
 
         # Pre-convert to a flat list of tuples for maximum drawing efficiency
-        # This allows using list slicing during the draw call
-        self.pixels = [
-            tuple(scaled_array[py, px])
-            for py in range(height)
-            for px in range(width)
-        ]
+        # Optimization: use a list comprehension for faster conversion from numpy to tuples
+        # build_pixel in term_utils is cached and requires hashable tuples.
+        self.pixels = [tuple(x) for x in scaled_array.reshape(-1, 3)]
 
     def draw(self, t_screen: 'Screen'):  # pylint: disable=too-many-locals
         """
@@ -111,7 +108,6 @@ class ImageSurface:
     def update(self, image_array: np.ndarray):
         """
         Updates the pixel buffer in-place from a new image array.
-        Reuses the existing list to avoid allocating a new ImageSurface per frame.
         :param image_array: A numpy array representing the image (H, W, 3).
         """
         h, w = image_array.shape[:2]
@@ -123,11 +119,10 @@ class ImageSurface:
             scaled_array = image_array[y_indices[:, None], x_indices]
         else:
             scaled_array = image_array
-        self.pixels[:] = [
-            tuple(scaled_array[py, px])
-            for py in range(self.height)
-            for px in range(self.width)
-        ]
+
+        # Optimization: use a list comprehension for faster conversion from numpy to tuples
+        # build_pixel in term_utils is cached and requires hashable tuples.
+        self.pixels[:] = [tuple(x) for x in scaled_array.reshape(-1, 3)]
 
     def move(self, x_pos: int, y_pos: int):
         """Shift the surface's position by (x_pos, y_pos)."""

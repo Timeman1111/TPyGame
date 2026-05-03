@@ -99,13 +99,17 @@ class Screen:
         sys.stdout.write(text + end)
         sys.stdout.flush()
 
-    def refresh(self, force_full: bool = False):
+    def refresh(self, force_full: bool = False, color_closeness: int = 0, bitrate: int = 0):
         """
         Refreshes the terminal screen by comparing the current frame with the previous one
         and outputting only the changes, or a full refresh if too many changes occur.
 
         If force_full is True, the comparison is skipped and the entire frame is always
         written — use this when the caller knows every pixel has changed (e.g. video).
+
+        :param force_full: Whether to force a full redraw.
+        :param color_closeness: Tolerance for color difference when comparing frames.
+        :param bitrate: Maximum number of cells to update in a partial refresh.
 
         All output is batched into a single write + flush to minimise I/O syscalls.
         The cursor is hidden for the duration of the write and restored to its prior
@@ -118,7 +122,7 @@ class Screen:
             do_full = True
             changes = None
         else:
-            changes = self.f1.compare(self.p1)
+            changes = self.f1.compare(self.p1, color_closeness=color_closeness, bitrate=bitrate)
             do_full = len(changes) > (self.width * self.height) // 2
 
         if do_full:

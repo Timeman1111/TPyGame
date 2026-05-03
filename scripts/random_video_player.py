@@ -21,47 +21,35 @@ def test_video():
 
     return
 
-
-
-
-
-
 def main():
     ts = tpy.render.Screen()
 
     out_size = 0.25
     video_position = (0, 0)
 
+    # Ensure test video exists
+    test_video()
 
-    vid_cap = test_video()
+    # Get video properties for scaling
+    vid_cap = cv2.VideoCapture(TEST_VIDEO_PATH)
+    width = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH) * out_size)
+    height = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT) * out_size)
+    vid_cap.release()
 
-    fps = vid_cap.get(cv2.CAP_PROP_FPS)
+    # Use the new Video class features
+    vid = tpy.video.Video(
+        x=video_position[0],
+        y=video_position[1],
+        width=width,
+        height=height,
+        source=TEST_VIDEO_PATH,
+        color_closeness=15,
+        bitrate=2000
+    )
 
-
-
-    width = vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
-    height = vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
-
-    vid = tpy.video.Video(x=video_position[0], y=video_position[1], width=int(width), height=int(height))
-
-
-    count = 0
-    while vid_cap.isOpened():
-        count += 1
-        ret, frame = vid_cap.read()
-
-        if not ret:
-            break
-
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        frame = cv2.resize(frame, (round(width * out_size), round(height * out_size)))
-
-        vid.input(frame)
-
-
+    while vid.next_frame():
         vid.draw(ts)
-        ts.refresh(force_full=False)
+        vid.refresh(ts)
 
 
 

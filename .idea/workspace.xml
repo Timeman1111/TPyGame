@@ -4,9 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Refactor `random_video_player.py` to optimize screen refresh and clean unused variables; update `.idea/workspace.xml` to refine metadata">
+    <list default="true" id="7b8d3489-cb77-478a-b05e-7a8f3e37557e" name="Changes" comment="Bump project version to `0.0.3` in `pyproject.toml` and update `.idea/workspace.xml` to refine metadata.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/random_video_player.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/random_video_player.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TPyGame.egg-info/PKG-INFO" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TPyGame.egg-info/SOURCES.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TPyGame.egg-info/dependency_links.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TPyGame.egg-info/requires.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TPyGame.egg-info/top_level.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/frame.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/frame.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/image.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/image.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/render.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/render.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tpygame/video.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tpygame/video.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,7 +119,7 @@
       <option name="presentableId" value="Default" />
       <updated>1777781341358</updated>
       <workItem from="1777781342397" duration="4867000" />
-      <workItem from="1777787282349" duration="1367000" />
+      <workItem from="1777787282349" duration="1882000" />
     </task>
     <task id="LOCAL-00001" summary="Add PyCharm project configuration files">
       <option name="closed" value="true" />
@@ -216,7 +225,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777788636587</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Bump project version to `0.0.3` in `pyproject.toml` and update `.idea/workspace.xml` to refine metadata.">
+      <option name="closed" value="true" />
+      <created>1777788659245</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1777788659245</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -237,6 +254,7 @@
     <MESSAGE value="Update `.idea/workspace.xml` and `.gitignore` to refine project settings and exclude IDE files" />
     <MESSAGE value="Update `.idea/workspace.xml` to adjust changelists and refine project metadata" />
     <MESSAGE value="Refactor `random_video_player.py` to optimize screen refresh and clean unused variables; update `.idea/workspace.xml` to refine metadata" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor `random_video_player.py` to optimize screen refresh and clean unused variables; update `.idea/workspace.xml` to refine metadata" />
+    <MESSAGE value="Bump project version to `0.0.3` in `pyproject.toml` and update `.idea/workspace.xml` to refine metadata." />
+    <option name="LAST_COMMIT_MESSAGE" value="Bump project version to `0.0.3` in `pyproject.toml` and update `.idea/workspace.xml` to refine metadata." />
   </component>
 </project>
