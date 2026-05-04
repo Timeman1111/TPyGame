@@ -95,7 +95,8 @@ TPyGame/
 │       ├── __init__.py
 │       ├── file/
 │       │   ├── fm.py          # FileManager I/O, directory, asset, and logger helpers
-│       │   └── whitelist.py   # Normalized path whitelist checks
+│       │   ├── whitelist.py   # Normalized path whitelist checks
+│       │   └── config.py      # Configuration management (dict-based and file-backed)
 │       └── render/
 │           ├── screen.py      # Terminal screen management and rendering
 │           ├── frame.py       # Frame buffering
@@ -123,6 +124,25 @@ The `tpygame.file.FileManager` helper includes safe wrappers for:
 - session cleanup for created files
 - asset directory loading helpers
 - file-backed loggers for terminal-safe debug output
+
+## ⚙️ Configuration
+
+TPyGame provides flexible configuration management:
+
+- **`Config`** - A simple dictionary-like container for application settings.
+- **`FileConfig`** - A file-backed configuration that automatically saves changes to a JSON file.
+
+```python
+from tpygame.file.config import FileConfig
+from tpygame.file.fm import FileManager
+
+fm = FileManager()
+config = FileConfig("config.json", fm)
+
+# Settings are automatically saved when modified
+config["theme"] = "dark"
+config["resolution"] = "high"
+```
 
 ## 💡 Examples
 
