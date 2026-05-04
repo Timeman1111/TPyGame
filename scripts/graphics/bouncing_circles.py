@@ -1,8 +1,22 @@
+"""
+This script simulates bouncing circles on the terminal screen.
+"""
 import tpygame as tpy
 import random
 
 class Circle:
+    """
+    Represents a bouncing circle on the screen.
+    """
     def __init__(self, x: int, y: int, radius: int, color: tuple[int, int, int] = (255, 255, 255)):
+        """
+        Initializes a Circle object.
+
+        :param x: Initial X-coordinate.
+        :param y: Initial Y-coordinate.
+        :param radius: Radius of the circle.
+        :param color: RGB color tuple.
+        """
 
         self.x =x
         self.y = y
@@ -16,6 +30,11 @@ class Circle:
 
 
     def update(self, screen: tpy.render.screen.Screen = None):
+        """
+        Updates the circle's position based on its velocity.
+
+        :param screen: The Screen object to use for boundary checks.
+        """
 
 
         self.x += self.x_vel
@@ -29,6 +48,11 @@ class Circle:
 
 
     def draw(self, screen: tpy.render.screen.Screen):
+        """
+        Draws the circle on the provided screen.
+
+        :param screen: The Screen object to draw on.
+        """
 
         self.update(screen)
 
@@ -38,6 +62,14 @@ class Circle:
 
 
 def create_circles(n: int, max_x_y: tuple[tuple[int, int], tuple[int, int]], radius: int = 5):
+    """
+    Creates a list of random Circle objects.
+
+    :param n: Number of circles to create.
+    :param max_x_y: Bounds for random X and Y positions.
+    :param radius: Radius of each circle.
+    :return: A list of Circle objects.
+    """
     circles = []
 
     for i in range(n):
@@ -50,6 +82,9 @@ def create_circles(n: int, max_x_y: tuple[tuple[int, int], tuple[int, int]], rad
 
 
 def main():
+    """
+    Main entry point for the bouncing circles simulation.
+    """
 
     screen = tpy.render.screen.Screen()
     tpy.render.term_utils.clear()
