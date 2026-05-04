@@ -5,6 +5,10 @@ from __future__ import annotations
 import random
 from typing import TYPE_CHECKING
 
+import numpy as np
+
+from .parallel import _worker_compare_chunk
+
 if TYPE_CHECKING:
     from .parallel import ParallelConfig
 
@@ -120,7 +124,7 @@ class Frame:
         else:
             self.pixels.clear()
 
-    def _compare_sequential(self, other: "Frame", bitrate: int, height_cells: int, width: int):
+    def _compare_sequential(self, other: "Frame", bitrate: int):
         """
         Sequential (single-threaded) frame comparison for changed cells.
         Each cell (x, vy) covers two consecutive pixel rows.
@@ -130,8 +134,6 @@ class Frame:
 
         :param other: The previous frame to compare against.
         :param bitrate: Maximum changed cells before early exit (0 = unlimited).
-        :param height_cells: Number of terminal-cell rows (height // 2).
-        :param width: Frame width in pixels.
         :return: (changes, truncated) where changes is a dict and truncated is a bool.
         """
         changes = {}
@@ -139,22 +141,19 @@ class Frame:
         other_pixels = other.pixels
 
         # Use a random starting row to avoid top-to-bottom scanline bias when bitrate is low
-        start_vy = random.randint(0, height_cells - 1) if bitrate > 0 else 0
+        start_vy = random.randint(0, (self.height // 2) - 1) if bitrate > 0 else 0
 
         count = 0
-        for i in range(height_cells):
-            vy = (start_vy + i) % height_cells
-            base_idx = vy * 2 * width
-            idx2_offset = width
-            for x in range(width):
+        for i in range(self.height // 2):
+            vy = (start_vy + i) % (self.height // 2)
+            base_idx = vy * 2 * self.width
+            for x in range(self.width):
                 idx1 = base_idx + x
-                idx2 = idx1 + idx2_offset
+                idx2 = idx1 + self.width
 
-                p1_1, p1_2 = self_pixels[idx1], self_pixels[idx2]
-                p2_1, p2_2 = other_pixels[idx1], other_pixels[idx2]
-
-                if p1_1 != p2_1 or p1_2 != p2_2:
-                    changes[(x, vy)] = (p1_1, p1_2)
+                p1_val = (self_pixels[idx1], self_pixels[idx2])
+                if p1_val != (other_pixels[idx1], other_pixels[idx2]):
+                    changes[(x, vy)] = p1_val
                     count += 1
                     if 0 < bitrate <= count:
                         return changes, True
@@ -178,17 +177,16 @@ class Frame:
             and self.height == other.height
         ):
             height_cells = self.height // 2
-            width = self.width
 
             if (
                 parallel is not None
                 and parallel.enabled
                 and height_cells >= parallel.num_processes
             ):
-                return self._compare_parallel(other, bitrate, parallel, height_cells, width)
+                return self._compare_parallel(other, bitrate, parallel)
 
             # Sequential path
-            return self._compare_sequential(other, bitrate, height_cells, width)
+            return self._compare_sequential(other, bitrate)
 
         return changes, False
 
@@ -197,8 +195,6 @@ class Frame:
         other: "Frame",
         bitrate: int,
         parallel: ParallelConfig,
-        height_cells: int,
-        width: int,
     ):
         """Parallel implementation of :meth:`compare` using a process pool.
 
@@ -207,36 +203,33 @@ class Frame:
         The full pixel buffers are converted to numpy byte arrays once upfront to
         avoid redundant allocations per chunk.
         """
-        import numpy as np  # pylint: disable=import-outside-toplevel
-        from .parallel import _worker_compare_chunk  # pylint: disable=import-outside-toplevel
-
-        num_proc = min(parallel.num_processes, height_cells)
-        chunk_size = height_cells // num_proc
-        pool = parallel.get_process_pool()
+        num_proc = min(parallel.num_processes, self.height // 2)
 
         # Convert entire buffers to numpy arrays once to avoid per-chunk allocation
-        self_arr = np.array(self.pixels, dtype=np.uint8).reshape(self.height, width, 3)
-        other_arr = np.array(other.pixels, dtype=np.uint8).reshape(other.height, width, 3)
+        self_arr = np.array(self.pixels, dtype=np.uint8).reshape((self.height, self.width, 3))
+        other_arr = np.array(other.pixels, dtype=np.uint8).reshape((other.height, self.width, 3))
 
         futures = []
         for i in range(num_proc):
-            start_vy = i * chunk_size
-            end_vy = height_cells if i == num_proc - 1 else start_vy + chunk_size
+            start_vy = i * ((self.height // 2) // num_proc)
+            end_vy = (
+                (self.height // 2) if i == num_proc - 1
+                else start_vy + ((self.height // 2) // num_proc)
+            )
             futures.append(
-                pool.submit(
+                parallel.get_process_pool().submit(
                     _worker_compare_chunk,
                     self_arr[start_vy * 2 : end_vy * 2].tobytes(),
                     other_arr[start_vy * 2 : end_vy * 2].tobytes(),
-                    width,
-                    start_vy,
-                    end_vy,
+                    self.width,
+                    (start_vy, end_vy),
                     0,  # per-chunk bitrate disabled; enforce in main process
                 )
             )
 
         changes: dict = {}
-        for f in futures:
-            chunk_changes, _ = f.result()
+        for f_res in futures:
+            chunk_changes = f_res.result()[0]
             changes.update(chunk_changes)
             if 0 < bitrate <= len(changes):
                 # Cancel any pending futures and return early

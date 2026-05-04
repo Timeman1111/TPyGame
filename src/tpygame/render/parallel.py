@@ -26,6 +26,8 @@ import os
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass, field
 
+import numpy as np
+
 
 # ---------------------------------------------------------------------------
 # Module-level picklable worker functions
@@ -43,8 +45,6 @@ def _worker_convert_chunk(flat_bytes: bytes, n_pixels: int) -> list:
     :param n_pixels: Number of pixels encoded in *flat_bytes*.
     :return: List of ``(R, G, B)`` integer tuples.
     """
-    import numpy as np  # lazy import — only needed in the worker process
-
     arr = np.frombuffer(flat_bytes, dtype=np.uint8).reshape(n_pixels, 3)
     return [tuple(int(v) for v in row) for row in arr]
 
@@ -53,49 +53,41 @@ def _worker_compare_chunk(
     self_bytes: bytes,
     other_bytes: bytes,
     width: int,
-    start_vy: int,
-    end_vy: int,
+    vy_range: tuple[int, int],
     bitrate: int,
 ) -> tuple[dict, bool]:
     """Compare a horizontal strip of two frames and return changed terminal cells.
 
     Each terminal cell ``(x, vy)`` covers two consecutive pixel rows.
-    *start_vy* and *end_vy* are in terminal-cell coordinates (half pixel
-    height).
+    *vy_range* contains (start_vy, end_vy) in terminal-cell coordinates.
 
     :param self_bytes: Raw pixel bytes for the current frame strip.
     :param other_bytes: Raw pixel bytes for the previous frame strip.
     :param width: Frame width in pixels.
-    :param start_vy: First terminal row (inclusive) of this strip.
-    :param end_vy: Last terminal row (exclusive) of this strip.
+    :param vy_range: Tuple of (start_vy, end_vy).
     :param bitrate: Maximum changed cells before early exit (0 = unlimited).
     :return: ``(changes, truncated)`` where *changes* maps ``(x, vy)`` to
         ``(top_colour, bottom_colour)`` tuples and *truncated* is ``True``
         when the bitrate limit was reached inside this chunk.
     """
-    import numpy as np
-
-    n_pixel_rows = (end_vy - start_vy) * 2
     self_arr = np.frombuffer(self_bytes, dtype=np.uint8).reshape(
-        n_pixel_rows, width, 3
+        (vy_range[1] - vy_range[0]) * 2, width, 3
     )
     other_arr = np.frombuffer(other_bytes, dtype=np.uint8).reshape(
-        n_pixel_rows, width, 3
+        (vy_range[1] - vy_range[0]) * 2, width, 3
     )
 
     changes: dict = {}
     count = 0
-    for vy_local in range(end_vy - start_vy):
-        vy = start_vy + vy_local
+    for vy_local in range(vy_range[1] - vy_range[0]):
+        vy = vy_range[0] + vy_local
         row0 = vy_local * 2
         row1 = row0 + 1
         for x in range(width):
-            top_s = tuple(int(v) for v in self_arr[row0, x])
-            top_o = tuple(int(v) for v in other_arr[row0, x])
-            bot_s = tuple(int(v) for v in self_arr[row1, x])
-            bot_o = tuple(int(v) for v in other_arr[row1, x])
-            if top_s != top_o or bot_s != bot_o:
-                changes[(x, vy)] = (top_s, bot_s)
+            if not (np.array_equal(self_arr[row0, x], other_arr[row0, x]) and
+                    np.array_equal(self_arr[row1, x], other_arr[row1, x])):
+                changes[(x, vy)] = (tuple(int(v) for v in self_arr[row0, x]),
+                                    tuple(int(v) for v in self_arr[row1, x]))
                 count += 1
                 if 0 < bitrate <= count:
                     return changes, True

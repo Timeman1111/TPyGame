@@ -1,3 +1,6 @@
+"""
+This module provides rendering components for TPyGame.
+"""
 from . import frame
 from . import image
 from . import parallel

@@ -7,18 +7,19 @@ per-frame allocation of a new surface and pixel list that would otherwise create
 GC pressure at video framerates.
 """
 
+import os
 import cv2
 import numpy as np
 from .image import ImageSurface
 
 
-class Video:
+class Video:  # pylint: disable=too-many-instance-attributes
     """
     Renders video frames onto a Screen using a single reusable ImageSurface.
     Can also manage its own cv2.VideoCapture source.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         x: int = 0,
         y: int = 0,
@@ -38,28 +39,79 @@ class Video:
         :param bitrate: Maximum pixels to update per frame in partial refresh.
         :param auto_resize: If True, automatically resizes to terminal dimensions on every frame.
         """
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.bitrate = bitrate
-        self.auto_resize = auto_resize
+        self.pos = [x, y]
+        self.size = [width, height]
+        self.config = {'bitrate': bitrate, 'auto_resize': auto_resize}
         self._surface: ImageSurface | None = None
         self.cursor = 0
         self.cap = None
         self.fps = 30  # Default fallback
 
         if source is not None:
-            self.cap = cv2.VideoCapture(source)
+            self.cap = cv2.VideoCapture(source)  # pylint: disable=no-member
             if self.cap.isOpened():
-                if self.width is None:
-                    self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                if self.height is None:
-                    self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                
-                source_fps = self.cap.get(cv2.CAP_PROP_FPS)
+                if self.size[0] is None:
+                    self.size[0] = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # pylint: disable=no-member
+                if self.size[1] is None:
+                    self.size[1] = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # pylint: disable=no-member
+
+                source_fps = self.cap.get(cv2.CAP_PROP_FPS)  # pylint: disable=no-member
                 if source_fps > 0:
                     self.fps = source_fps
+
+    @property
+    def x(self):
+        """X-coordinate."""
+        return self.pos[0]
+
+    @x.setter
+    def x(self, value):
+        self.pos[0] = value
+
+    @property
+    def y(self):
+        """Y-coordinate."""
+        return self.pos[1]
+
+    @y.setter
+    def y(self, value):
+        self.pos[1] = value
+
+    @property
+    def width(self):
+        """Width."""
+        return self.size[0]
+
+    @width.setter
+    def width(self, value):
+        self.size[0] = value
+
+    @property
+    def height(self):
+        """Height."""
+        return self.size[1]
+
+    @height.setter
+    def height(self, value):
+        self.size[1] = value
+
+    @property
+    def bitrate(self):
+        """Bitrate."""
+        return self.config['bitrate']
+
+    @bitrate.setter
+    def bitrate(self, value):
+        self.config['bitrate'] = value
+
+    @property
+    def auto_resize(self):
+        """Auto resize flag."""
+        return self.config['auto_resize']
+
+    @auto_resize.setter
+    def auto_resize(self, value):
+        self.config['auto_resize'] = value
 
     def next_frame(self) -> bool:
         """
@@ -67,7 +119,6 @@ class Video:
         :return: True if a frame was read, False otherwise.
         """
         if self.auto_resize:
-            import os
             tw, th = os.get_terminal_size()
             self.width = tw
             self.height = th * 2
@@ -79,9 +130,9 @@ class Video:
             return False
 
         # Pre-process: BGR to RGB and resize for better performance
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # pylint: disable=no-member
         if self.width and self.height:
-            frame = cv2.resize(frame, (self.width, self.height))
+            frame = cv2.resize(frame, (self.width, self.height))  # pylint: disable=no-member
 
         self.input(frame)
         return True
@@ -133,7 +184,7 @@ class Video:
         """
         self.cursor = 0
         if self.cap:
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # pylint: disable=no-member
 
     def move(self, x: int, y: int):
         """
@@ -145,4 +196,3 @@ class Video:
     def __del__(self):
         if self.cap:
             self.cap.release()
-

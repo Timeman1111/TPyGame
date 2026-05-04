@@ -1,7 +1,13 @@
+"""
+This module provides the WhiteList class for managing allowed file paths.
+"""
 import pathlib
 
 
 class WhiteList:
+    """
+    A class to maintain a list of allowed file paths.
+    """
     def __init__(self):
         self.__allowed: list[pathlib.Path] = []
 
@@ -25,7 +31,7 @@ class WhiteList:
             self.__allowed.append(path)
 
             return True
-        except:
+        except Exception:  # pylint: disable=broad-exception-caught
             return False
 
     def get(self) -> list[pathlib.Path]:
@@ -48,5 +54,3 @@ class WhiteList:
 
     def __len__(self):
         return len(self.__allowed)
-
-

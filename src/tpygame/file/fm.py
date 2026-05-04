@@ -1,6 +1,14 @@
+"""
+This module provides the FileManager class for file and folder operations.
+"""
 import pathlib
-from whitelist import WhiteList
+from .whitelist import WhiteList
+
+
 class FileManager:
+    """
+    A class to manage file and folder operations, including whitelisting.
+    """
     def __init__(self, wl: bool = False):
         """
         Represents an initializer for configuring internal components.
@@ -14,26 +22,22 @@ class FileManager:
 
         """
 
-        if wl:
-            self.wl: bool = True
-            self.whitelist = WhiteList()
-        else:
-            self.wl: bool = False
-
+        self.wl: bool = wl
         self.whitelist: WhiteList = WhiteList()
         self._blocked_exts: list[str] = []
 
     def __create_file(self, path: pathlib.Path) -> bool:
         """
-        Creates a new file at the specified path if it does not already exist, is not in the blocked extensions list,
-        and is allowed by the optional whitelist.
+        Creates a new file at the specified path if it does not already exist,
+        is not in the blocked extensions list, and is allowed by the optional whitelist.
 
         :param path: Path to the file to be created.
         :type path: pathlib.Path
         :return: True if the file was successfully created, False otherwise.
         :rtype: bool
         """
-        if path.exists() or (path.suffix in self._blocked_exts) or (self.wl and path not in self.whitelist):
+        if path.exists() or (path.suffix in self._blocked_exts) or \
+                (self.wl and path not in self.whitelist):
             return False
 
         path.touch()
@@ -131,4 +135,3 @@ class FileManager:
         """
         path_obj = pathlib.Path(path)
         return self.__does_file_exist(path_obj) or self.__does_folder_exist(path_obj)
-

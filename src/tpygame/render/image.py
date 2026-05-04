@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 import cv2
 
+from .parallel import _worker_convert_chunk
+
 if TYPE_CHECKING:
     from .parallel import ParallelConfig
 
@@ -44,17 +46,14 @@ def _build_pixels(scaled_array: np.ndarray, parallel: ParallelConfig | None) -> 
     if parallel is None or not parallel.enabled:
         return [tuple(x) for x in flat]
 
-    from .parallel import _worker_convert_chunk  # pylint: disable=import-outside-toplevel
-
-    height, width = scaled_array.shape[:2]
-    num_chunks = min(parallel.num_processes, height)
-    chunk_size = height // num_chunks
+    num_chunks = min(parallel.num_processes, scaled_array.shape[0])
+    chunk_size = scaled_array.shape[0] // num_chunks
 
     chunks_bytes = []
     chunks_sizes = []
     for i in range(num_chunks):
         start = i * chunk_size
-        end = height if i == num_chunks - 1 else start + chunk_size
+        end = scaled_array.shape[0] if i == num_chunks - 1 else start + chunk_size
         chunk = scaled_array[start:end].reshape(-1, 3)
         chunks_bytes.append(chunk.tobytes())
         chunks_sizes.append(chunk.shape[0])
@@ -76,7 +75,9 @@ class ImageSurface:
     """
 
     @staticmethod
-    def _scale_image_array(image_array: np.ndarray, target_height: int, target_width: int) -> np.ndarray:
+    def _scale_image_array(
+        image_array: np.ndarray, target_height: int, target_width: int
+    ) -> np.ndarray:
         """
         Scales an image array to target dimensions using nearest-neighbor interpolation.
 

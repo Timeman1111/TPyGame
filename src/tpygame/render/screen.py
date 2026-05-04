@@ -6,10 +6,6 @@ import os
 import sys
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from .parallel import ParallelConfig
-
-
 from .frame import Frame
 from .term_utils import (
     init_terminal,
@@ -18,6 +14,9 @@ from .term_utils import (
     generate_move_string,
     build_pixel,
 )
+
+if TYPE_CHECKING:
+    from .parallel import ParallelConfig
 
 
 class Screen:
@@ -35,17 +34,28 @@ class Screen:
         """
         init_terminal()
         self.last_pos = last_pos
-        self.width, self.height = os.get_terminal_size()
+        w, h = os.get_terminal_size()
+        self.size = (w, h)
         self._parallel = parallel
 
-        self.p1: Frame = Frame(self.width, self.height * 2)
-        self.f1: Frame = Frame(self.width, self.height * 2)
+        self.p1: Frame = Frame(w, h * 2)
+        self.f1: Frame = Frame(w, h * 2)
 
         # Force the first refresh to be a full redraw to avoid "spottiness"
         # when the initial terminal state is not black.
         self._first_refresh = True
 
         self.is_cursor_visible = True
+
+    @property
+    def width(self):
+        """Returns the current terminal width."""
+        return self.size[0]
+
+    @property
+    def height(self):
+        """Returns the current terminal height."""
+        return self.size[1]
 
     def hide_cursor(self):
         """
@@ -119,8 +129,7 @@ class Screen:
         """
         current_width, current_height = os.get_terminal_size()
         if current_width != self.width or current_height != self.height:
-            self.width = current_width
-            self.height = current_height
+            self.size = (current_width, current_height)
             self.p1 = Frame(self.width, self.height * 2)
             self.f1 = Frame(self.width, self.height * 2)
             self._first_refresh = True
@@ -134,33 +143,30 @@ class Screen:
 
         :return: List of string parts to be concatenated and written.
         """
+        from .parallel import _worker_build_rows  # pylint: disable=import-outside-toplevel
         parts = [generate_move_string(0, 0)]
-        width = self.width
-        height = self.height
         pixels = self.f1.pixels
-        parallel = self._parallel
 
-        if parallel is not None and parallel.enabled and height >= parallel.num_threads:
-            from .parallel import _worker_build_rows  # pylint: disable=import-outside-toplevel
-            thread_pool = parallel.get_thread_pool()
-            num_threads = max(1, min(parallel.num_threads, height))
-            chunk_size = height // num_threads
+        if (self._parallel is not None and self._parallel.enabled and
+                self.height >= self._parallel.num_threads):
+            thread_pool = self._parallel.get_thread_pool()
+            num_threads = max(1, min(self._parallel.num_threads, self.height))
+            chunk_size = self.height // num_threads
             futures = []
             for i in range(num_threads):
                 start = i * chunk_size
-                end = height if i == num_threads - 1 else start + chunk_size
+                end = self.height if i == num_threads - 1 else start + chunk_size
                 futures.append(
-                    thread_pool.submit(_worker_build_rows, pixels, width, start, end)
+                    thread_pool.submit(_worker_build_rows, pixels, self.width, start, end)
                 )
-            for f in futures:
-                parts.append(f.result())
+            for f_res in futures:
+                parts.append(f_res.result())
         else:
-            for vy in range(height):
-                top_base = vy * 2 * width
-                bottom_base = top_base + width
+            for vy in range(self.height):
+                top_base = vy * 2 * self.width
                 row_parts = [
-                    build_pixel(pixels[top_base + x], pixels[bottom_base + x])
-                    for x in range(width)
+                    build_pixel(pixels[top_base + x], pixels[top_base + self.width + x])
+                    for x in range(self.width)
                 ]
                 parts.append("".join(row_parts) + "\n")
 
