@@ -20,7 +20,12 @@ if TYPE_CHECKING:
 
 
 def load_img(img_path: str):
-    """Load an image from disk and return it as an RGB numpy array."""
+    """
+    Load an image from disk and return it as an RGB numpy array.
+
+    :param img_path: The file path to the image.
+    :return: A numpy array representing the image in RGB format.
+    """
     img_arr = cv2.imread(img_path)  # pylint: disable=no-member
     img_rgb_arr = cv2.cvtColor(img_arr, cv2.COLOR_BGR2RGB)  # pylint: disable=no-member
     return img_rgb_arr

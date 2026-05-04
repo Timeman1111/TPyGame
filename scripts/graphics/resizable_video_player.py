@@ -1,3 +1,6 @@
+"""
+This script demonstrates a video player that can handle terminal resizing.
+"""
 import tpygame as tpy
 import requests
 import cv2
@@ -10,6 +13,9 @@ import sys
 TEST_VIDEO_PATH = "scripts/test_files/random_video.mp4"
 
 def ensure_test_video():
+    """
+    Ensures that a test video exists in the scripts/test_files directory.
+    """
     if not pathlib.Path(TEST_VIDEO_PATH).exists():
         print("Downloading test video...")
         pathlib.Path("scripts/test_files").mkdir(parents=True, exist_ok=True)
@@ -20,6 +26,9 @@ def ensure_test_video():
             f.write(video_req.content)
 
 def main():
+    """
+    Main function to run the resizable video player demonstration.
+    """
     ensure_test_video()
 
 

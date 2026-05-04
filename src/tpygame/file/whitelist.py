@@ -9,20 +9,19 @@ class WhiteList:
     A class to maintain a list of allowed file paths.
     """
     def __init__(self):
+        """
+        Initializes an empty WhiteList.
+        """
         self.__allowed: list[pathlib.Path] = []
 
 
     def add(self, path: pathlib.Path):
         """
-        Adds a file type suffix to the allowed list.
+        Adds a file path to the allowed list.
 
-        This method takes a file path, converts it to a `pathlib.Path` object if it is
-        provided as a string, extracts its suffix, and appends the suffix to the allowed
-        list. If an error occurs during this process, the method returns False.
-
-        :param path: The file path whose suffix is to be added.
+        :param path: The file path to be added.
         :type path: pathlib.Path
-        :return: True if the suffix was successfully added, False if an error occurred.
+        :return: True if the path was successfully added, False if an error occurred.
         :rtype: bool
         """
         try:
@@ -36,21 +35,30 @@ class WhiteList:
 
     def get(self) -> list[pathlib.Path]:
         """
-        Retrieves the list of allowed file type suffixes.
+        Retrieves the list of allowed file paths.
 
-        This method returns the current list of allowed file type suffixes that have been
+        This method returns the current list of allowed file paths that have been
         added to the whitelist.
 
-        :return: A list of allowed file type suffixes.
-        :rtype: list[str]
+        :return: A list of allowed file paths.
+        :rtype: list[pathlib.Path]
         """
         return self.__allowed
 
     def __contains__(self, item: pathlib.Path) -> bool:
+        """
+        Checks if a path is in the whitelist.
+        """
         return item in self.__allowed
 
     def __iter__(self):
+        """
+        Returns an iterator for the allowed paths.
+        """
         return iter(self.__allowed)
 
     def __len__(self):
+        """
+        Returns the number of allowed paths.
+        """
         return len(self.__allowed)

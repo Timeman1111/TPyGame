@@ -66,6 +66,7 @@ class Video:  # pylint: disable=too-many-instance-attributes
 
     @x.setter
     def x(self, value):
+        """Sets the X-coordinate."""
         self.pos[0] = value
 
     @property
@@ -75,6 +76,7 @@ class Video:  # pylint: disable=too-many-instance-attributes
 
     @y.setter
     def y(self, value):
+        """Sets the Y-coordinate."""
         self.pos[1] = value
 
     @property
@@ -84,6 +86,7 @@ class Video:  # pylint: disable=too-many-instance-attributes
 
     @width.setter
     def width(self, value):
+        """Sets the width."""
         self.size[0] = value
 
     @property
@@ -93,6 +96,7 @@ class Video:  # pylint: disable=too-many-instance-attributes
 
     @height.setter
     def height(self, value):
+        """Sets the height."""
         self.size[1] = value
 
     @property
@@ -102,6 +106,7 @@ class Video:  # pylint: disable=too-many-instance-attributes
 
     @bitrate.setter
     def bitrate(self, value):
+        """Sets the bitrate."""
         self.config['bitrate'] = value
 
     @property
@@ -111,6 +116,7 @@ class Video:  # pylint: disable=too-many-instance-attributes
 
     @auto_resize.setter
     def auto_resize(self, value):
+        """Sets the auto resize flag."""
         self.config['auto_resize'] = value
 
     def next_frame(self) -> bool:
@@ -172,6 +178,9 @@ class Video:  # pylint: disable=too-many-instance-attributes
     def refresh(self, t_screen: 'Screen', force_full: bool = False):
         """
         Helper to refresh the screen with this video's bitrate settings.
+
+        :param t_screen: The Screen object to refresh.
+        :param force_full: Whether to force a full redraw.
         """
         t_screen.refresh(
             force_full=force_full,
@@ -194,5 +203,8 @@ class Video:  # pylint: disable=too-many-instance-attributes
         self.y += y
 
     def __del__(self):
+        """
+        Ensures the video capture is released when the object is destroyed.
+        """
         if self.cap:
             self.cap.release()

@@ -1,3 +1,6 @@
+"""
+This script plays a random video downloaded from the web in the terminal.
+"""
 import tpygame as tpy
 import requests
 import cv2
@@ -7,6 +10,9 @@ import pathlib
 TEST_VIDEO_PATH = "scripts/test_files/random_video.mp4"
 
 def test_video():
+    """
+    Ensures a test video file exists, downloading it if necessary.
+    """
 
     if pathlib.Path(TEST_VIDEO_PATH).exists():
         vid_cap = cv2.VideoCapture(TEST_VIDEO_PATH)
@@ -22,6 +28,9 @@ def test_video():
     return
 
 def main():
+    """
+    Main function to initialize and run the video player.
+    """
     ts = tpy.render.screen.Screen()
 
     out_size = 0.5

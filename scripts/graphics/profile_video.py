@@ -1,4 +1,7 @@
 
+"""
+Profiling script for video rendering performance in tpygame.
+"""
 import cProfile
 import pstats
 import pathlib
@@ -9,6 +12,11 @@ import tpygame as tpy
 TEST_VIDEO_PATH = "scripts/test_files/random_video.mp4"
 
 def test_video():
+    """
+    Ensures a test video file exists, downloading it if necessary.
+
+    :return: A cv2.VideoCapture object for the test video.
+    """
 
     if pathlib.Path(TEST_VIDEO_PATH).exists():
         vid_cap = cv2.VideoCapture(TEST_VIDEO_PATH)
@@ -25,6 +33,9 @@ def test_video():
 
 
 def main():
+    """
+    Main function to run the video rendering loop for profiling.
+    """
 
     screen = tpy.render.screen.Screen()
     video = tpy.render.video.Video(source=TEST_VIDEO_PATH, auto_resize=True)

@@ -22,9 +22,17 @@ class FileManager:
 
         """
 
+        self.created_files: list[pathlib.Path] = []
+
         self.wl: bool = wl
         self.whitelist: WhiteList = WhiteList()
         self._blocked_exts: list[str] = []
+
+    def __repr__(self) -> str:
+        """
+        Returns a string representation of the FileManager instance.
+        """
+        return f"<FileManager: {self.wl}>"
 
     def __create_file(self, path: pathlib.Path) -> bool:
         """
@@ -41,6 +49,8 @@ class FileManager:
             return False
 
         path.touch()
+
+        self.created_files.append(path)
         return True
 
 
