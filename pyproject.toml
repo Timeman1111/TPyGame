@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "TPyGame"
-version = "0.0.4"
+version = "0.0.5"
 description = "A project using NumPy and OpenCV"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -17,6 +17,7 @@ license = {text = "MIT"}  # Or your chosen license
 dependencies = [
     "numpy>=2.4.4",
     "opencv-python>=4.13.0.92",
+    "pathlib>=1.0.1",
 ]
 
 [project.urls]
