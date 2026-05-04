@@ -108,7 +108,7 @@ def main():
                 ticktimer[circle] = random.randint(0, 20)
 
             circle.draw(screen)
-        screen.refresh()
+        screen.refresh(force_full=False, bitrate = 10000)
 
 
 
