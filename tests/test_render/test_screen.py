@@ -88,6 +88,41 @@ def test_draw_line(mock_terminal):
     for y in range(10, 16):
         assert screen[(10, y)] == color
 
+def test_draw_circle_outline(mock_terminal):
+    screen = Screen()
+    color = (255, 0, 0)
+    # Circle at (10, 10) with radius 2
+    screen.draw_circle(10, 10, 2, color)
+    
+    # Check some points on the outline
+    assert screen[(12, 10)] == color
+    assert screen[(8, 10)] == color
+    assert screen[(10, 12)] == color
+    assert screen[(10, 8)] == color
+
+def test_draw_circle_filled(mock_terminal):
+    screen = Screen()
+    color = (0, 255, 0)
+    screen.draw_circle(10, 10, 2, color, fill=True)
+    
+    # Check some points inside
+    assert screen[(10, 10)] == color
+    assert screen[(11, 10)] == color
+    assert screen[(10, 11)] == color
+    assert screen[(9, 10)] == color
+    assert screen[(10, 9)] == color
+
+def test_draw_circle_border(mock_terminal):
+    screen = Screen()
+    fill_color = (0, 0, 255)
+    border_color = (255, 255, 255)
+    screen.draw_circle(10, 10, 2, fill_color, fill=True, border_color=border_color)
+    
+    # Center should be fill_color
+    assert screen[(10, 10)] == fill_color
+    # Outline should be border_color
+    assert screen[(12, 10)] == border_color
+
 @patch('tpygame.render.screen.build_pixel', return_value="X")
 def test_refresh_full(mock_build, mock_terminal):
     screen = Screen()

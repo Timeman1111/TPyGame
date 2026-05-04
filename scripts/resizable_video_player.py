@@ -26,7 +26,7 @@ def main():
     proc_count = 2
     thread_count = 2
 
-    cfg = tpy.render.parallel.ParallelConfig(enabled=True, num_processes=proc_count, num_threads=thread_count)
+    #cfg = tpy.render.parallel.ParallelConfig(enabled=True, num_processes=proc_count, num_threads=thread_count)
 
     ts = tpy.render.screen.Screen()
     ts.hide_cursor()
@@ -43,8 +43,8 @@ def main():
     vid2 = tpy.render.video.Video(
         x=30,
         y=10,
-        width=40,
-        height=40,
+        width=60,
+        height=60,
         source=TEST_VIDEO_PATH,
         auto_resize=False,
     )

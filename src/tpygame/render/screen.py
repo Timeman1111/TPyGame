@@ -306,3 +306,65 @@ class Screen:
             if e2 < dx:
                 err += dx
                 y += sy
+
+    def draw_circle(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        self,
+        x: int,
+        y: int,
+        radius: int,
+        color: tuple[int, int, int],
+        fill: bool = False,
+        border_color: tuple[int, int, int] | None = None,
+    ):
+        """
+        Draws a circle on the current frame.
+        :param x: Center X-coordinate.
+        :param y: Center Y-coordinate.
+        :param radius: Radius of the circle.
+        :param color: Color of the circle (fill color if filled, else outline color).
+        :param fill: Whether to fill the circle.
+        :param border_color: Optional color for the circle's border.
+        """
+        if fill:
+            cx = radius
+            cy = 0
+            err = 0
+
+            while cx >= cy:
+                # Draw horizontal lines between symmetric points
+                for i in range(x - cx, x + cx + 1):
+                    self[(i, y + cy)] = color
+                    self[(i, y - cy)] = color
+                for i in range(x - cy, x + cy + 1):
+                    self[(i, y + cx)] = color
+                    self[(i, y - cx)] = color
+
+                cy += 1
+                if err <= 0:
+                    err += 2 * cy + 1
+                else:
+                    cx -= 1
+                    err += 2 * (cy - cx) + 1
+
+        if border_color is not None or not fill:
+            outline_color = border_color if border_color is not None else color
+            cx = radius
+            cy = 0
+            err = 0
+
+            while cx >= cy:
+                self[(x + cx, y + cy)] = outline_color
+                self[(x + cy, y + cx)] = outline_color
+                self[(x - cy, y + cx)] = outline_color
+                self[(x - cx, y + cy)] = outline_color
+                self[(x - cx, y - cy)] = outline_color
+                self[(x - cy, y - cx)] = outline_color
+                self[(x + cy, y - cx)] = outline_color
+                self[(x + cx, y - cy)] = outline_color
+
+                cy += 1
+                if err <= 0:
+                    err += 2 * cy + 1
+                else:
+                    cx -= 1
+                    err += 2 * (cy - cx) + 1
