@@ -14,8 +14,15 @@ class WhiteList:
         """
         self.__allowed: list[pathlib.Path] = []
 
+    @staticmethod
+    def _normalize(path: pathlib.Path | str) -> pathlib.Path:
+        """Normalize a path for safe comparisons."""
+        if isinstance(path, str):
+            path = pathlib.Path(path)
+        return path.expanduser().resolve(strict=False)
 
-    def add(self, path: pathlib.Path):
+
+    def add(self, path: pathlib.Path | str) -> bool:
         """
         Adds a file path to the allowed list.
 
@@ -24,14 +31,15 @@ class WhiteList:
         :return: True if the path was successfully added, False if an error occurred.
         :rtype: bool
         """
-        try:
-            if isinstance(path, str):
-                path = pathlib.Path(path)
-            self.__allowed.append(path)
-
-            return True
-        except Exception:  # pylint: disable=broad-exception-caught
+        if not isinstance(path, (str, pathlib.Path)):
             return False
+
+        normalized = self._normalize(path)
+        if normalized in self.__allowed:
+            return True
+
+        self.__allowed.append(normalized)
+        return True
 
     def get(self) -> list[pathlib.Path]:
         """
@@ -43,13 +51,15 @@ class WhiteList:
         :return: A list of allowed file paths.
         :rtype: list[pathlib.Path]
         """
-        return self.__allowed
+        return list(self.__allowed)
 
     def __contains__(self, item: pathlib.Path) -> bool:
         """
         Checks if a path is in the whitelist.
         """
-        return item in self.__allowed
+        if not isinstance(item, (str, pathlib.Path)):
+            return False
+        return self._normalize(item) in self.__allowed
 
     def __iter__(self):
         """

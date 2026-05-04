@@ -88,6 +88,9 @@ video = tpy.render.video.Video(
 
 ```
 tpygame/
+├── file/
+│   ├── fm.py          # FileManager I/O, directory, asset, and logging helpers
+│   └── whitelist.py   # Normalized path whitelist utilities
 ├── render/
 │   ├── screen.py      # Terminal screen management and rendering
 │   ├── frame.py       # Frame buffering
@@ -96,6 +99,18 @@ tpygame/
 │   ├── parallel.py    # Parallel processing configuration
 │   └── term_utils.py  # Terminal utility functions
 ```
+
+## 🗂️ File Utilities
+
+The `tpygame.file.FileManager` helper includes safe wrappers for:
+
+- text/bytes read and write
+- JSON save/load
+- directory creation/list/delete
+- extension block/unblock policy
+- session cleanup for created files
+- asset directory loading helpers
+- file-backed loggers for terminal-safe debug output
 
 ## 💡 Examples
 

@@ -55,6 +55,15 @@ def test_create_file_success(tmp_path):
     assert target.is_file()
 
 
+def test_create_file_creates_missing_parent_directories(tmp_path):
+    fm = FileManager()
+    target = tmp_path / "nested" / "deeper" / "new_file.txt"
+
+    assert fm.create_file(str(target)) is True
+    assert target.exists()
+    assert target.parent.exists()
+
+
 def test_create_file_rejects_existing_file(tmp_path):
     """
     Tests the create_file method of FileManager to ensure it rejects attempts to
@@ -86,11 +95,13 @@ def test_create_file_rejects_blocked_extensions(tmp_path):
     :return: None
     """
     fm = FileManager()
-    fm._blocked_exts.append(".tmp")
+    assert fm.block_extension("tmp") is True
 
     target = tmp_path / "blocked.tmp"
     assert fm.create_file(str(target)) is False
     assert not target.exists()
+    assert fm.unblock_extension(".tmp") is True
+    assert fm.create_file(str(target)) is True
 
 
 def test_create_file_respects_whitelist_when_enabled(tmp_path):
@@ -116,6 +127,102 @@ def test_create_file_respects_whitelist_when_enabled(tmp_path):
     fm.whitelist.add(allowed)
     assert fm.create_file(str(allowed)) is True
     assert allowed.exists()
+
+
+def test_create_file_normalizes_path_for_whitelist(tmp_path):
+    fm = FileManager(wl=True)
+    allowed = tmp_path / "allowed" / "inside.txt"
+    disallowed_via_dotdot = tmp_path / "allowed" / ".." / "outside.txt"
+
+    fm.whitelist.add(allowed)
+
+    assert fm.create_file(str(allowed)) is True
+    assert fm.create_file(str(disallowed_via_dotdot)) is False
+
+
+def test_text_and_bytes_io(tmp_path):
+    fm = FileManager()
+    text_target = tmp_path / "save" / "state.txt"
+    bytes_target = tmp_path / "save" / "raw.bin"
+
+    assert fm.write_text(str(text_target), "hello") is True
+    assert fm.read_text(str(text_target)) == "hello"
+
+    assert fm.write_bytes(str(bytes_target), b"\x00\x01") is True
+    assert fm.read_bytes(str(bytes_target)) == b"\x00\x01"
+
+
+def test_json_io_and_malformed_input(tmp_path):
+    fm = FileManager()
+    target = tmp_path / "save" / "data.json"
+
+    payload = {"score": 42, "name": "player"}
+    assert fm.write_json(str(target), payload) is True
+    assert fm.read_json(str(target)) == payload
+
+    target.write_text("{bad json", encoding="utf-8")
+    assert fm.read_json(str(target)) is None
+
+
+def test_directory_operations(tmp_path):
+    fm = FileManager()
+    target_dir = tmp_path / "assets" / "sprites"
+    file_a = target_dir / "a.txt"
+    file_b = target_dir / "b.txt"
+
+    assert fm.create_directory(str(target_dir)) is True
+    file_a.write_text("a", encoding="utf-8")
+    file_b.write_text("b", encoding="utf-8")
+
+    entries = fm.list_directory(str(target_dir))
+    assert entries is not None
+    assert {entry.name for entry in entries} == {"a.txt", "b.txt"}
+
+    assert fm.delete_directory(str(target_dir)) is False
+    assert fm.delete_directory(str(target_dir), recursive=True) is True
+    assert not target_dir.exists()
+
+
+def test_delete_file_and_cleanup(tmp_path):
+    fm = FileManager()
+    a = tmp_path / "a.txt"
+    b = tmp_path / "b.txt"
+
+    assert fm.create_file(str(a)) is True
+    assert fm.write_text(str(b), "temp") is True
+    assert fm.delete_file(str(a)) is True
+    assert not a.exists()
+
+    removed = fm.cleanup()
+    assert removed >= 1
+    assert not b.exists()
+
+
+def test_asset_directory_and_loader(tmp_path):
+    fm = FileManager()
+    asset_dir = tmp_path / "game_assets"
+    texture = asset_dir / "textures" / "player.txt"
+
+    assert fm.set_asset_dir(str(asset_dir)) is True
+    texture.parent.mkdir(parents=True, exist_ok=True)
+    texture.write_text("sprite", encoding="utf-8")
+
+    assert fm.load_asset("textures/player.txt", binary=False) == "sprite"
+    assert fm.load_asset("../outside.txt", binary=False) is None
+
+
+def test_get_logger_writes_to_file(tmp_path):
+    fm = FileManager()
+    log_file = tmp_path / "logs" / "debug.log"
+
+    logger = fm.get_logger(str(log_file), name="test-file-manager-logger")
+    assert logger is not None
+    logger.info("terminal-safe debug line")
+    for handler in logger.handlers:
+        handler.flush()
+
+    content = log_file.read_text(encoding="utf-8")
+    assert "terminal-safe debug line" in content
 
 
 def test_file_and_folder_existence_checks(tmp_path):

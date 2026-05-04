@@ -31,9 +31,13 @@ def test_add_string_coerces_to_path():
     :return: None
     """
     wl = WhiteList()
+    original = pathlib.Path("assets/image.png")
 
-    assert wl.add("assets/image.png") is True
-    assert wl.get() == [pathlib.Path("assets/image.png")]
+    assert wl.add(str(original)) is True
+    stored = wl.get()
+    assert len(stored) == 1
+    assert stored[0].name == original.name
+    assert stored[0].is_absolute()
 
 
 def test_iteration_preserves_insert_order():
@@ -54,5 +58,15 @@ def test_iteration_preserves_insert_order():
     wl.add(first)
     wl.add(second)
 
-    assert list(iter(wl)) == [first, second]
+    normalized = [first.resolve(strict=False), second.resolve(strict=False)]
+    assert list(iter(wl)) == normalized
+
+
+def test_membership_uses_normalized_paths(tmp_path):
+    wl = WhiteList()
+    allowed = tmp_path / "dir" / "file.txt"
+    equivalent = tmp_path / "dir" / "." / "file.txt"
+
+    wl.add(allowed)
+    assert equivalent in wl
 
