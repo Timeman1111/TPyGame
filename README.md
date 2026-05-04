@@ -87,17 +87,29 @@ video = tpy.render.video.Video(
 ## 📦 Project Structure
 
 ```
-tpygame/
-├── file/
-│   ├── fm.py          # FileManager I/O, directory, asset, and logging helpers
-│   └── whitelist.py   # Normalized path whitelist utilities
-├── render/
-│   ├── screen.py      # Terminal screen management and rendering
-│   ├── frame.py       # Frame buffering
-│   ├── image.py       # Image surface rendering
-│   ├── video.py       # Video playback and processing
-│   ├── parallel.py    # Parallel processing configuration
-│   └── term_utils.py  # Terminal utility functions
+TPyGame/
+├── pyproject.toml
+├── README.md
+├── src/
+│   └── tpygame/
+│       ├── __init__.py
+│       ├── file/
+│       │   ├── fm.py          # FileManager I/O, directory, asset, and logger helpers
+│       │   └── whitelist.py   # Normalized path whitelist checks
+│       └── render/
+│           ├── screen.py      # Terminal screen management and rendering
+│           ├── frame.py       # Frame buffering
+│           ├── image.py       # Image surface rendering
+│           ├── video.py       # Video playback and processing
+│           ├── parallel.py    # Parallel processing configuration
+│           └── term_utils.py  # Terminal utility functions
+├── tests/
+│   ├── test_file/
+│   └── test_render/
+└── scripts/
+    ├── fileio/
+    ├── graphics/
+    └── test_files/
 ```
 
 ## 🗂️ File Utilities
