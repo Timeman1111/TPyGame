@@ -18,6 +18,7 @@ dependencies = [
     "numpy>=2.4.4",
     "opencv-python>=4.13.0.92",
     "pathlib>=1.0.1",
+    "sounddevice>=0.0.5",
 ]
 
 [project.urls]
