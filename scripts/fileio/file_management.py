@@ -2,7 +2,7 @@
 This script demonstrates the usage of the FileManager class for file and folder operations.
 """
 from tpygame.file import FileManager
-
+import os
 
 def main():
     """
@@ -14,6 +14,18 @@ def main():
     print("Creating FileManager instance...")
     fm = FileManager()
     print(fm)
+
+    txt_res = fm.create_file("test.txt")
+
+    if txt_res:
+        print("File created successfully.")
+
+
+    print(fm.created_files)
+
+    for file in fm.created_files:
+        print(file)
+        os.remove(file)
 
     print("Finished...")
     return
